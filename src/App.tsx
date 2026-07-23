@@ -71,31 +71,43 @@ export default function App() {
   }
 
   return (
-    <div className="sm-app">
-      <div className="sm-sidebar">
-        <DeviceSelector device={device} onSelect={setDevice} />
-        {device === 'pc' && <MakerSelector maker={maker} onSelect={handleSelectMaker} />}
-        {device === 'pc' && <SizeSelector maker={maker} size={size} onSelect={setSize} />}
-        <StickerUploader onUpload={handleUpload} />
-        <StickerThumbnailList stickers={stickers} onDelete={handleDeleteSticker} />
-        <ResetAllButton onReset={handleResetAll} />
-      </div>
+    <div className="sm-page">
+      <header className="sm-header">
+        <span className="sm-header-mark" aria-hidden>
+          ✂️
+        </span>
+        <div>
+          <h1>Sticker Mockuper</h1>
+          <p>お手持ちのステッカーを、貼る前にシミュレーション</p>
+        </div>
+      </header>
 
-      <div className="sm-main">
-        <MockupCanvas
-          device={device}
-          maker={maker}
-          size={size}
-          stickers={stickers}
-          placed={placed}
-          selectedId={selectedId}
-          frameRef={frameRef}
-          onAddPlaced={handleAddPlaced}
-          onSelect={setSelectedId}
-          onUpdatePlaced={handleUpdatePlaced}
-          onDeletePlaced={handleDeletePlaced}
-        />
-        <SaveImageButton targetRef={frameRef} onBeforeCapture={() => setSelectedId(null)} />
+      <div className="sm-app">
+        <div className="sm-sidebar">
+          <DeviceSelector device={device} onSelect={setDevice} />
+          {device === 'pc' && <MakerSelector maker={maker} onSelect={handleSelectMaker} />}
+          {device === 'pc' && <SizeSelector maker={maker} size={size} onSelect={setSize} />}
+          <StickerUploader onUpload={handleUpload} />
+          <StickerThumbnailList stickers={stickers} onDelete={handleDeleteSticker} />
+          <ResetAllButton onReset={handleResetAll} />
+        </div>
+
+        <div className="sm-main">
+          <MockupCanvas
+            device={device}
+            maker={maker}
+            size={size}
+            stickers={stickers}
+            placed={placed}
+            selectedId={selectedId}
+            frameRef={frameRef}
+            onAddPlaced={handleAddPlaced}
+            onSelect={setSelectedId}
+            onUpdatePlaced={handleUpdatePlaced}
+            onDeletePlaced={handleDeletePlaced}
+          />
+          <SaveImageButton targetRef={frameRef} onBeforeCapture={() => setSelectedId(null)} />
+        </div>
       </div>
     </div>
   );
