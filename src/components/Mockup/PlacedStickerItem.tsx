@@ -33,7 +33,7 @@ export function PlacedStickerItem({
         onSelect();
       }}
     >
-      <img src={sticker.src} alt="" onMouseDown={onStartMove} />
+      <img src={sticker.src} alt="" draggable={false} onMouseDown={onStartMove} />
       <button
         className="sm-x"
         aria-label="削除"
