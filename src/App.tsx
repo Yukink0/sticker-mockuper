@@ -7,6 +7,7 @@ import { StickerThumbnailList } from './components/Sidebar/StickerThumbnailList'
 import { ResetAllButton } from './components/Sidebar/ResetAllButton';
 import { MockupCanvas } from './components/Mockup/MockupCanvas';
 import { SaveImageButton } from './components/Mockup/SaveImageButton';
+import { StickerMark } from './components/StickerMark';
 import { getDefaultSize } from './config/devices';
 import type {
   DeviceType,
@@ -73,8 +74,8 @@ export default function App() {
   return (
     <div className="sm-page">
       <header className="sm-header">
-        <span className="sm-header-mark" aria-hidden>
-          ✂️
+        <span className="sm-header-mark">
+          <StickerMark />
         </span>
         <div>
           <h1>Sticker Mockuper</h1>

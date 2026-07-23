@@ -26,6 +26,9 @@ interface Props {
 }
 
 const INITIAL_WIDTH_PCT = 14;
+// フレームをoverflow:hiddenでクリップしているため、選択枠/削除・リサイズハンドルが
+// 縁で見切れないよう、配置可能な範囲に少し余白を持たせる
+const EDGE_MARGIN_PX = 10;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
@@ -58,8 +61,16 @@ export function MockupCanvas({
     const hPct = (wPct * rect.width) / rect.height;
     const wPx = (wPct / 100) * rect.width;
     const hPx = (hPct / 100) * rect.height;
-    const xPx = clamp(e.clientX - rect.left - wPx / 2, 0, rect.width - wPx);
-    const yPx = clamp(e.clientY - rect.top - hPx / 2, 0, rect.height - hPx);
+    const xPx = clamp(
+      e.clientX - rect.left - wPx / 2,
+      EDGE_MARGIN_PX,
+      rect.width - wPx - EDGE_MARGIN_PX,
+    );
+    const yPx = clamp(
+      e.clientY - rect.top - hPx / 2,
+      EDGE_MARGIN_PX,
+      rect.height - hPx - EDGE_MARGIN_PX,
+    );
 
     onAddPlaced({
       id: crypto.randomUUID(),
@@ -87,8 +98,16 @@ export function MockupCanvas({
     const offY = e.clientY - rect.top - startYPx;
 
     function onMove(ev: MouseEvent) {
-      const xPx = clamp(ev.clientX - rect.left - offX, 0, rect.width - wPx);
-      const yPx = clamp(ev.clientY - rect.top - offY, 0, rect.height - hPx);
+      const xPx = clamp(
+        ev.clientX - rect.left - offX,
+        EDGE_MARGIN_PX,
+        rect.width - wPx - EDGE_MARGIN_PX,
+      );
+      const yPx = clamp(
+        ev.clientY - rect.top - offY,
+        EDGE_MARGIN_PX,
+        rect.height - hPx - EDGE_MARGIN_PX,
+      );
       onUpdatePlaced(id, {
         xPct: (xPx / rect.width) * 100,
         yPct: (yPx / rect.height) * 100,
@@ -112,9 +131,15 @@ export function MockupCanvas({
     const rect = frame.getBoundingClientRect();
     const startX = e.clientX;
     const startWPx = (p.wPct / 100) * rect.width;
+    const originXPx = (p.xPct / 100) * rect.width;
+    const originYPx = (p.yPct / 100) * rect.height;
+    const maxWPx = Math.min(
+      rect.width - EDGE_MARGIN_PX - originXPx,
+      rect.height - EDGE_MARGIN_PX - originYPx,
+    );
 
     function onMove(ev: MouseEvent) {
-      const wPx = Math.max(20, startWPx + (ev.clientX - startX));
+      const wPx = clamp(startWPx + (ev.clientX - startX), 20, maxWPx);
       onUpdatePlaced(id, {
         wPct: (wPx / rect.width) * 100,
         hPct: (wPx / rect.height) * 100,
@@ -128,10 +153,12 @@ export function MockupCanvas({
     document.addEventListener('mouseup', onUp);
   }
 
+  const variant = device === 'ipad' ? 'ipad' : maker;
+
   return (
     <div
       ref={frameRef}
-      className="sm-mockup"
+      className={`sm-mockup sm-mockup--${variant}`}
       style={{ width: frameSize.width, height: frameSize.height }}
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
@@ -139,7 +166,7 @@ export function MockupCanvas({
         if (e.target === e.currentTarget) onSelect(null);
       }}
     >
-      <DeviceLogo device={device} maker={maker} />
+      <DeviceLogo device={device} maker={maker} frameWidth={frameSize.width} />
       {placed.map((p) => (
         <PlacedStickerItem
           key={p.id}

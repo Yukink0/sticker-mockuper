@@ -4,17 +4,23 @@ import type { DeviceType, Maker } from '../../types';
 interface Props {
   device: DeviceType;
   maker: Maker;
+  frameWidth: number;
 }
 
-export function DeviceLogo({ device, maker }: Props) {
+export function DeviceLogo({ device, maker, frameWidth }: Props) {
   const showApple = device === 'ipad' || maker === 'macbook';
+  const size = Math.round(Math.min(Math.max(frameWidth * 0.09, 20), 36));
+
   return (
-    <div className="sm-logo">
-      {showApple ? (
-        <IconBrandApple size={28} aria-hidden />
-      ) : (
-        <IconBrandWindows size={28} aria-hidden />
-      )}
-    </div>
+    <>
+      {device === 'ipad' && <span className="sm-camera" />}
+      <div className="sm-logo">
+        {showApple ? (
+          <IconBrandApple size={size} aria-hidden />
+        ) : (
+          <IconBrandWindows size={size} aria-hidden />
+        )}
+      </div>
+    </>
   );
 }
