@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { DeviceSelector } from './components/Sidebar/DeviceSelector';
 import { MakerSelector } from './components/Sidebar/MakerSelector';
 import { SizeSelector } from './components/Sidebar/SizeSelector';
@@ -71,6 +71,44 @@ export default function App() {
     setSelectedId(null);
   }
 
+  // 選択・移動を始めたステッカーを配列の末尾に回して最前面に表示する
+  // （重なったステッカーを後から選び直して手前に持ってこられるようにするため）
+  function handleSelectPlaced(id: string) {
+    setPlaced((prev) => {
+      const index = prev.findIndex((p) => p.id === id);
+      if (index === -1 || index === prev.length - 1) return prev;
+      const item = prev[index];
+      return [...prev.slice(0, index), ...prev.slice(index + 1), item];
+    });
+    setSelectedId(id);
+  }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setSelectedId(null);
+      } else if (e.key === 'Delete' && selectedId) {
+        handleDeletePlaced(selectedId);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId]);
+
+  useEffect(() => {
+    // サムネイルを枠外にドロップした際、ブラウザが既定のドロップ動作
+    // （画像を別タブで開く等）を行わないようにする保険
+    function preventDefault(e: Event) {
+      e.preventDefault();
+    }
+    window.addEventListener('dragover', preventDefault);
+    window.addEventListener('drop', preventDefault);
+    return () => {
+      window.removeEventListener('dragover', preventDefault);
+      window.removeEventListener('drop', preventDefault);
+    };
+  }, []);
+
   return (
     <div className="sm-page">
       <header className="sm-header">
@@ -103,7 +141,8 @@ export default function App() {
             selectedId={selectedId}
             frameRef={frameRef}
             onAddPlaced={handleAddPlaced}
-            onSelect={setSelectedId}
+            onSelectPlaced={handleSelectPlaced}
+            onDeselect={() => setSelectedId(null)}
             onUpdatePlaced={handleUpdatePlaced}
             onDeletePlaced={handleDeletePlaced}
           />

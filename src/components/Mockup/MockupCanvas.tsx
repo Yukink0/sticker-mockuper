@@ -20,7 +20,8 @@ interface Props {
   selectedId: string | null;
   frameRef: RefObject<HTMLDivElement | null>;
   onAddPlaced: (sticker: PlacedSticker) => void;
-  onSelect: (id: string | null) => void;
+  onSelectPlaced: (id: string) => void;
+  onDeselect: () => void;
   onUpdatePlaced: (id: string, patch: Partial<PlacedSticker>) => void;
   onDeletePlaced: (id: string) => void;
 }
@@ -29,6 +30,8 @@ const INITIAL_WIDTH_PCT = 14;
 // フレームをoverflow:hiddenでクリップしているため、選択枠/削除・リサイズハンドルが
 // 縁で見切れないよう、配置可能な範囲に少し余白を持たせる
 const EDGE_MARGIN_PX = 10;
+// 小さすぎるとリサイズ/削除ハンドルが掴みにくくなるための下限
+const MIN_STICKER_SIZE_PX = 28;
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(value, max));
@@ -43,7 +46,8 @@ export function MockupCanvas({
   selectedId,
   frameRef,
   onAddPlaced,
-  onSelect,
+  onSelectPlaced,
+  onDeselect,
   onUpdatePlaced,
   onDeletePlaced,
 }: Props) {
@@ -84,7 +88,7 @@ export function MockupCanvas({
 
   function startMove(e: ReactMouseEvent, id: string) {
     e.preventDefault();
-    onSelect(id);
+    onSelectPlaced(id);
     const p = placed.find((x) => x.id === id);
     const frame = frameRef.current;
     if (!p || !frame) return;
@@ -139,7 +143,7 @@ export function MockupCanvas({
     );
 
     function onMove(ev: MouseEvent) {
-      const wPx = clamp(startWPx + (ev.clientX - startX), 20, maxWPx);
+      const wPx = clamp(startWPx + (ev.clientX - startX), MIN_STICKER_SIZE_PX, maxWPx);
       onUpdatePlaced(id, {
         wPct: (wPx / rect.width) * 100,
         hPct: (wPx / rect.height) * 100,
@@ -163,7 +167,7 @@ export function MockupCanvas({
       onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onSelect(null);
+        if (e.target === e.currentTarget) onDeselect();
       }}
     >
       <DeviceLogo device={device} maker={maker} frameWidth={frameSize.width} />
@@ -172,7 +176,7 @@ export function MockupCanvas({
           key={p.id}
           sticker={p}
           selected={p.id === selectedId}
-          onSelect={() => onSelect(p.id)}
+          onSelect={() => onSelectPlaced(p.id)}
           onDelete={() => onDeletePlaced(p.id)}
           onStartMove={(e) => startMove(e, p.id)}
           onStartResize={(e) => startResize(e, p.id)}
