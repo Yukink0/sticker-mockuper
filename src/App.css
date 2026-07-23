@@ -1,0 +1,183 @@
+.sm-app {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.sm-sidebar {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sm-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.sm-btn-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border-strong);
+  background: var(--surface-2);
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.sm-btn.active {
+  border: 2px solid var(--border-accent);
+  background: var(--bg-accent);
+  color: var(--text-accent);
+}
+
+.sm-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sm-btn.sm-danger {
+  color: var(--text-danger);
+}
+
+.sm-upload-label {
+  width: 100%;
+  justify-content: center;
+}
+
+.sm-thumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sm-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.sm-thumb {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  border: 0.5px solid var(--border);
+  overflow: hidden;
+  cursor: grab;
+  background: var(--surface-2);
+}
+
+.sm-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sm-del {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--fill-danger);
+  color: var(--on-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.sm-main {
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--surface-1);
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.sm-mockup {
+  position: relative;
+  background: var(--surface-2);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 8px;
+}
+
+.sm-logo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.sm-placed {
+  position: absolute;
+  cursor: move;
+  touch-action: none;
+}
+
+.sm-placed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.sm-x {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--fill-danger);
+  color: var(--on-danger);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.sm-rs {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--fill-accent);
+  display: none;
+  cursor: nwse-resize;
+}
+
+.sm-placed.selected .sm-x,
+.sm-placed.selected .sm-rs {
+  display: flex;
+}
+
+.sm-save {
+  justify-content: center;
+}

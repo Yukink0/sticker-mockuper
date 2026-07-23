@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Sticker Mockuper - 参考実装デモ</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  :root{
+    --border:#ddd; --border-strong:#bbb;
+    --radius:8px;
+    --surface-1:#f5f5f4; --surface-2:#ffffff;
+    --text-primary:#1a1a1a; --text-secondary:#666; --text-muted:#999;
+    --bg-accent:#e6f1fb; --border-accent:#378add; --text-accent:#185fa5;
+    --fill-accent:#378add; --fill-danger:#e24b4a; --on-danger:#ffffff; --text-danger:#a32d2d;
+  }
+  body{font-family:-apple-system,"Hiragino Kaku Gothic ProN",sans-serif;background:var(--surface-1);padding:2rem;color:var(--text-primary)}
+  .sm-btn{padding:6px 14px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface-2);font-size:13px;cursor:pointer;color:var(--text-primary)}
+  .sm-btn.active{border:2px solid var(--border-accent);background:var(--bg-accent);color:var(--text-accent)}
+  .sm-btn:disabled{opacity:0.4;cursor:not-allowed}
+  .sm-thumb{position:relative;width:52px;height:52px;border-radius:var(--radius);border:0.5px solid var(--border);overflow:hidden;cursor:grab;background:var(--surface-2)}
+  .sm-thumb img{width:100%;height:100%;object-fit:cover}
+  .sm-thumb .sm-del{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--fill-danger);color:var(--on-danger);display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;border:none}
+  .sm-placed{position:absolute;cursor:move;touch-action:none}
+  .sm-placed img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+  .sm-placed .sm-x{position:absolute;top:-8px;right:-8px;width:18px;height:18px;border-radius:50%;background:var(--fill-danger);color:var(--on-danger);display:none;align-items:center;justify-content:center;font-size:11px;cursor:pointer;border:none}
+  .sm-placed .sm-rs{position:absolute;bottom:-6px;right:-6px;width:12px;height:12px;border-radius:50%;background:var(--fill-accent);display:none;cursor:nwse-resize}
+  .sm-placed.selected .sm-x,.sm-placed.selected .sm-rs{display:flex}
+</style>
+</head>
+<body>
+
+<!--
+  参考実装デモ：Sticker Mockuper
+  ※これはClaude.ai上のプロトタイプ用に書いたコードをそのまま単体HTMLファイルとして
+    動くように包んだものです。実装の「挙動の参考」として使うことを想定しています。
+    実際のプロダクト実装（React化・実寸アスペクト比対応・MacBook/Surface切り替え等）は
+    別途 requirements.md の要件定義に従って作り直してください。
+-->
+
+<div style="display:flex;gap:24px;flex-wrap:wrap;max-width:680px">
+  <div style="width:180px;display:flex;flex-direction:column;gap:14px">
+    <div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">デバイス</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="sm-btn active" id="dev-macbook" onclick="selectDevice('macbook')"><i class="ti ti-device-laptop" style="font-size:14px;margin-right:4px" aria-hidden="true"></i>PC</button>
+        <button class="sm-btn" id="dev-ipad" onclick="selectDevice('ipad')"><i class="ti ti-device-tablet" style="font-size:14px;margin-right:4px" aria-hidden="true"></i>iPad</button>
+        <button class="sm-btn" disabled title="近日対応">スーツケース</button>
+      </div>
+    </div>
+    <div id="sizeRow">
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">サイズ</div>
+      <div style="display:flex;gap:6px" id="sizeButtons"></div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">ステッカーをアップロード</div>
+      <label class="sm-btn" style="display:flex;align-items:center;gap:6px;justify-content:center">
+        <i class="ti ti-upload" style="font-size:14px" aria-hidden="true"></i>画像を選ぶ
+        <input type="file" accept="image/*" multiple style="display:none" onchange="handleUpload(event)">
+      </label>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">アップロード済み（ドラッグして配置）</div>
+      <div id="stickerList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+    </div>
+    <button class="sm-btn" onclick="deleteAll()" style="color:var(--text-danger)"><i class="ti ti-trash" style="font-size:14px;margin-right:4px" aria-hidden="true"></i>全て削除</button>
+  </div>
+
+  <div style="flex:1;min-width:260px;display:flex;align-items:center;justify-content:center;background:var(--surface-1);border-radius:12px;padding:2rem">
+    <div id="mockup" style="position:relative;background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:8px" ondragover="event.preventDefault()" ondrop="handleDrop(event)" onclick="if(event.target.id==='mockup')deselectAll()"></div>
+  </div>
+</div>
+
+<script>
+let device='macbook', size='14';
+let stickers=[];
+let placed=[];
+let selectedId=null;
+let stickerSeq=1, placedSeq=1;
+
+/*
+  NOTE for Claude Code:
+  下記の sizes は「見た目の大小」だけを変える簡易版です。
+  要件定義書のとおり、実装時は MacBook / Surface のメーカー選択を追加し、
+  それぞれ requirements.md の「6. 参考：デバイスごとのアスペクト比」の
+  実寸比率（mm換算）に基づいた縦横比に置き換えてください。
+*/
+const sizes={macbook:{13:{w:280,h:180},14:{w:300,h:192},16:{w:330,h:212}},ipad:{full:{w:220,h:290}}};
+
+function selectDevice(d){
+  device=d;
+  document.getElementById('dev-macbook').classList.toggle('active',d==='macbook');
+  document.getElementById('dev-ipad').classList.toggle('active',d==='ipad');
+  document.getElementById('sizeRow').style.display = d==='macbook' ? 'block' : 'none';
+  if(d==='ipad') size='full';
+  else size='14';
+  renderSizeButtons();
+  renderMockup();
+}
+
+function renderSizeButtons(){
+  const box=document.getElementById('sizeButtons');
+  if(device!=='macbook'){box.innerHTML='';return;}
+  box.innerHTML=['13','14','16'].map(s=>
+    `<button class="sm-btn ${s===size?'active':''}" onclick="selectSize('${s}')">${s}"</button>`
+  ).join('');
+}
+function selectSize(s){size=s;renderSizeButtons();renderMockup();}
+
+function renderMockup(){
+  const dim = sizes[device][size];
+  const el=document.getElementById('mockup');
+  el.style.width=dim.w+'px';
+  el.style.height=dim.h+'px';
+  el.querySelectorAll('.sm-logo').forEach(n=>n.remove());
+  const logo=document.createElement('div');
+  logo.className='sm-logo';
+  logo.style.cssText='position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--text-muted)';
+  logo.innerHTML='<i class="ti ti-brand-apple" style="font-size:28px" aria-hidden="true"></i>';
+  el.appendChild(logo);
+  renderPlaced();
+}
+
+function handleUpload(e){
+  [...e.target.files].forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      stickers.push({id:'s'+(stickerSeq++),src:ev.target.result});
+      renderStickerList();
+    };
+    reader.readAsDataURL(file);
+  });
+  e.target.value='';
+}
+
+function renderStickerList(){
+  const box=document.getElementById('stickerList');
+  box.innerHTML = stickers.map(s=>`
+    <div class="sm-thumb" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${s.id}')">
+      <img src="${s.src}">
+      <button class="sm-del" onclick="deleteSticker('${s.id}')" aria-label="削除">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>`).join('') || '<span style="font-size:12px;color:var(--text-muted)">まだありません</span>';
+}
+
+function deleteSticker(id){
+  stickers=stickers.filter(s=>s.id!==id);
+  renderStickerList();
+}
+
+function handleDrop(e){
+  e.preventDefault();
+  const id=e.dataTransfer.getData('text/plain');
+  const s=stickers.find(x=>x.id===id);
+  if(!s) return;
+  const rect=document.getElementById('mockup').getBoundingClientRect();
+  const x=Math.max(0,Math.min(e.clientX-rect.left-30,rect.width-60));
+  const y=Math.max(0,Math.min(e.clientY-rect.top-30,rect.height-60));
+  placed.push({id:'p'+(placedSeq++),src:s.src,x,y,w:60,h:60});
+  renderPlaced();
+}
+
+function renderPlaced(){
+  const el=document.getElementById('mockup');
+  el.querySelectorAll('.sm-placed').forEach(n=>n.remove());
+  placed.forEach(p=>{
+    const div=document.createElement('div');
+    div.className='sm-placed'+(p.id===selectedId?' selected':'');
+    div.style.cssText=`left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px`;
+    div.innerHTML=`<img src="${p.src}"><button class="sm-x" aria-label="削除"><i class="ti ti-x" aria-hidden="true"></i></button><div class="sm-rs"></div>`;
+    div.querySelector('img').addEventListener('mousedown',ev=>startMove(ev,p.id));
+    div.addEventListener('click',ev=>{ev.stopPropagation();selectedId=p.id;renderPlaced();});
+    div.querySelector('.sm-x').addEventListener('click',ev=>{ev.stopPropagation();placed=placed.filter(x=>x.id!==p.id);selectedId=null;renderPlaced();});
+    div.querySelector('.sm-rs').addEventListener('mousedown',ev=>startResize(ev,p.id));
+    el.appendChild(div);
+  });
+}
+
+function startMove(e,id){
+  e.preventDefault();e.stopPropagation();
+  selectedId=id;renderPlaced();
+  const p=placed.find(x=>x.id===id);
+  const rect=document.getElementById('mockup').getBoundingClientRect();
+  const offX=e.clientX-rect.left-p.x, offY=e.clientY-rect.top-p.y;
+  function onMove(ev){
+    p.x=Math.max(0,Math.min(ev.clientX-rect.left-offX,rect.width-p.w));
+    p.y=Math.max(0,Math.min(ev.clientY-rect.top-offY,rect.height-p.h));
+    renderPlaced();
+  }
+  function onUp(){document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+function startResize(e,id){
+  e.preventDefault();e.stopPropagation();
+  const p=placed.find(x=>x.id===id);
+  const startX=e.clientX, startW=p.w;
+  function onMove(ev){
+    p.w=p.h=Math.max(20,startW+(ev.clientX-startX));
+    renderPlaced();
+  }
+  function onUp(){document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);}
+  document.addEventListener('mousemove',onMove);
+  document.addEventListener('mouseup',onUp);
+}
+
+function deselectAll(){selectedId=null;renderPlaced();}
+
+function deleteAll(){
+  stickers=[];placed=[];selectedId=null;
+  renderStickerList();renderPlaced();
+}
+
+renderSizeButtons();
+renderStickerList();
+renderMockup();
+</script>
+</body>
+</html>
