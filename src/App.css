@@ -243,6 +243,12 @@
   background: linear-gradient(160deg, #f7f7f8 0%, #e4e5e7 50%, #d4d5d7 100%);
 }
 
+.sm-mockup--iphone-17,
+.sm-mockup--iphone-17pro {
+  border-radius: 20px;
+  background: linear-gradient(160deg, #f5f5f6 0%, #e0e1e3 45%, #cbccce 100%);
+}
+
 .sm-camera {
   position: absolute;
   top: 6%;
@@ -252,6 +258,47 @@
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #7a7e84, #1e1f21 72%);
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* iPhone 17: 左上の2眼カメラアイランド */
+.sm-camera-island {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  background: linear-gradient(155deg, #55585e, #1c1d1f);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: space-evenly;
+  justify-content: space-evenly;
+  padding: 3px;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12);
+}
+
+/* iPhone 17 Pro: 上部の横長3眼カメラプレート */
+.sm-camera-plateau {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  height: 20px;
+  border-radius: 11px;
+  background: linear-gradient(155deg, #55585e, #1c1d1f);
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 6px;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12);
+}
+
+.sm-camera-lens {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7a7e84, #050505 75%);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.08);
 }
 
 .sm-logo {
@@ -264,6 +311,10 @@
   pointer-events: none;
 }
 
+.sm-logo--iphone {
+  top: 64%;
+}
+
 .sm-placed {
   position: absolute;
   cursor: move;
@@ -271,6 +322,7 @@
   border-radius: 4px;
   outline: 2px solid transparent;
   outline-offset: 3px;
+  transform-origin: center;
   transition: outline-color 0.12s ease;
 }
 
@@ -326,8 +378,39 @@
   transform: scale(1.2);
 }
 
+.sm-rotate {
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--fill-accent);
+  border: 1.5px solid var(--surface-2);
+  display: none;
+  cursor: grab;
+  transition: transform 0.1s ease;
+}
+
+.sm-rotate::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 13px;
+  background: var(--border-strong);
+  transform: translateX(-50%);
+}
+
+.sm-rotate:hover {
+  transform: translateX(-50%) scale(1.2);
+}
+
 .sm-placed.selected .sm-x,
-.sm-placed.selected .sm-rs {
+.sm-placed.selected .sm-rs,
+.sm-placed.selected .sm-rotate {
   display: flex;
 }
 

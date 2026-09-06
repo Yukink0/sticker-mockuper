@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { DeviceSelector } from './components/Sidebar/DeviceSelector';
 import { MakerSelector } from './components/Sidebar/MakerSelector';
 import { SizeSelector } from './components/Sidebar/SizeSelector';
+import { IphoneModelSelector } from './components/Sidebar/IphoneModelSelector';
 import { StickerUploader } from './components/Sidebar/StickerUploader';
 import { StickerThumbnailList } from './components/Sidebar/StickerThumbnailList';
 import { ResetAllButton } from './components/Sidebar/ResetAllButton';
@@ -14,6 +15,7 @@ import type {
   Maker,
   MacbookSize,
   SurfaceSize,
+  IphoneModel,
   StickerItem,
   PlacedSticker,
 } from './types';
@@ -23,6 +25,7 @@ export default function App() {
   const [device, setDevice] = useState<DeviceType>('pc');
   const [maker, setMaker] = useState<Maker>('macbook');
   const [size, setSize] = useState<MacbookSize | SurfaceSize>('14');
+  const [iphoneModel, setIphoneModel] = useState<IphoneModel>('17');
   const [stickers, setStickers] = useState<StickerItem[]>([]);
   const [placed, setPlaced] = useState<PlacedSticker[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -39,9 +42,18 @@ export default function App() {
       const reader = new FileReader();
       reader.onload = (ev) => {
         const src = ev.target?.result;
-        if (typeof src === 'string') {
-          setStickers((prev) => [...prev, { id: crypto.randomUUID(), src }]);
-        }
+        if (typeof src !== 'string') return;
+
+        // 配置時に画像本来の縦横比で箱を作れるよう、実寸を読み取っておく
+        const img = new Image();
+        img.onload = () => {
+          const aspectRatio = img.naturalWidth / img.naturalHeight || 1;
+          setStickers((prev) => [...prev, { id: crypto.randomUUID(), src, aspectRatio }]);
+        };
+        img.onerror = () => {
+          setStickers((prev) => [...prev, { id: crypto.randomUUID(), src, aspectRatio: 1 }]);
+        };
+        img.src = src;
       };
       reader.readAsDataURL(file);
     });
@@ -121,6 +133,9 @@ export default function App() {
           <DeviceSelector device={device} onSelect={setDevice} />
           {device === 'pc' && <MakerSelector maker={maker} onSelect={handleSelectMaker} />}
           {device === 'pc' && <SizeSelector maker={maker} size={size} onSelect={setSize} />}
+          {device === 'iphone' && (
+            <IphoneModelSelector model={iphoneModel} onSelect={setIphoneModel} />
+          )}
           <StickerUploader onUpload={handleUpload} />
           <StickerThumbnailList stickers={stickers} onDelete={handleDeleteSticker} />
           <ResetAllButton onReset={handleResetAll} />
@@ -131,6 +146,7 @@ export default function App() {
             device={device}
             maker={maker}
             size={size}
+            iphoneModel={iphoneModel}
             stickers={stickers}
             placed={placed}
             selectedId={selectedId}

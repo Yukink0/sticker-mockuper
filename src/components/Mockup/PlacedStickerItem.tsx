@@ -9,6 +9,7 @@ interface Props {
   onDelete: () => void;
   onStartMove: (e: ReactMouseEvent) => void;
   onStartResize: (e: ReactMouseEvent) => void;
+  onStartRotate: (e: ReactMouseEvent) => void;
 }
 
 export function PlacedStickerItem({
@@ -18,6 +19,7 @@ export function PlacedStickerItem({
   onDelete,
   onStartMove,
   onStartResize,
+  onStartRotate,
 }: Props) {
   return (
     <div
@@ -27,6 +29,7 @@ export function PlacedStickerItem({
         top: `${sticker.yPct}%`,
         width: `${sticker.wPct}%`,
         height: `${sticker.hPct}%`,
+        transform: `rotate(${sticker.rotationDeg}deg)`,
       }}
       onClick={(e) => {
         e.stopPropagation();
@@ -45,6 +48,7 @@ export function PlacedStickerItem({
         <IconX size={11} aria-hidden />
       </button>
       <div className="sm-rs" onMouseDown={onStartResize} />
+      <div className="sm-rotate" onMouseDown={onStartRotate} />
     </div>
   );
 }

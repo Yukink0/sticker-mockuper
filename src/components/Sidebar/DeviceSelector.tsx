@@ -2,6 +2,7 @@
 // アイコンファイルすべてを解決しようとして極端に遅くなるため、個別ファイルから直接importする
 import IconDeviceLaptop from '@tabler/icons-react/dist/esm/icons/IconDeviceLaptop.mjs';
 import IconDeviceTablet from '@tabler/icons-react/dist/esm/icons/IconDeviceTablet.mjs';
+import IconDeviceMobile from '@tabler/icons-react/dist/esm/icons/IconDeviceMobile.mjs';
 import IconLuggage from '@tabler/icons-react/dist/esm/icons/IconLuggage.mjs';
 import type { DeviceType } from '../../types';
 
@@ -28,6 +29,13 @@ export function DeviceSelector({ device, onSelect }: Props) {
         >
           <IconDeviceTablet size={14} aria-hidden />
           iPad
+        </button>
+        <button
+          className={`sm-btn${device === 'iphone' ? ' active' : ''}`}
+          onClick={() => onSelect('iphone')}
+        >
+          <IconDeviceMobile size={14} aria-hidden />
+          iPhone
         </button>
         <button className="sm-btn" disabled title="近日対応">
           <IconLuggage size={14} aria-hidden />
