@@ -14,6 +14,17 @@ function waitForNextPaint() {
   });
 }
 
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/png'));
+}
+
+function downloadCanvas(canvas: HTMLCanvasElement) {
+  const link = document.createElement('a');
+  link.download = 'sticker-mockup.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
 export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
   const [saving, setSaving] = useState(false);
 
@@ -25,10 +36,28 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
       onBeforeCapture();
       await waitForNextPaint();
       const canvas = await html2canvas(targetRef.current, { backgroundColor: null, scale: 2 });
-      const link = document.createElement('a');
-      link.download = 'sticker-mockup.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+
+      // iOS Safari等は<a download>にほぼ対応していないため、Web Share API（ファイル共有）が
+      // 使える場合はそちらを優先する。ネイティブの共有シートに「画像を保存」等が含まれる。
+      const blob = await canvasToBlob(canvas);
+      const file = blob ? new File([blob], 'sticker-mockup.png', { type: 'image/png' }) : null;
+      const nav = navigator as Navigator & {
+        canShare?: (data?: { files?: File[] }) => boolean;
+        share?: (data: { files?: File[]; title?: string }) => Promise<void>;
+      };
+
+      if (file && nav.canShare?.({ files: [file] }) && nav.share) {
+        try {
+          await nav.share({ files: [file], title: 'Sticker Mockup' });
+          return;
+        } catch (err) {
+          // ユーザーが共有シートをキャンセルした場合は何もしない
+          if (err instanceof DOMException && err.name === 'AbortError') return;
+          // それ以外の失敗時はダウンロード方式にフォールバックする
+        }
+      }
+
+      downloadCanvas(canvas);
     } finally {
       setSaving(false);
     }
