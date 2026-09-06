@@ -161,7 +161,7 @@ export default function App() {
         </div>
       </div>
 
-      <footer className="sm-footer">Powerd by CREATIVESTUDIOSNOW</footer>
+      <footer className="sm-footer">by CREATIVESTUDIOSNOW</footer>
     </div>
   );
 }
