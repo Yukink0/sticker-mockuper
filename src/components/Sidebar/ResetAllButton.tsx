@@ -1,4 +1,4 @@
-import { IconTrash } from '@tabler/icons-react';
+import IconTrash from '@tabler/icons-react/dist/esm/icons/IconTrash.mjs';
 
 interface Props {
   onReset: () => void;

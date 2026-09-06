@@ -1,5 +1,5 @@
 import type { MouseEvent as ReactMouseEvent } from 'react';
-import { IconX } from '@tabler/icons-react';
+import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 import type { PlacedSticker } from '../../types';
 
 interface Props {

@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import { IconUpload } from '@tabler/icons-react';
+import IconUpload from '@tabler/icons-react/dist/esm/icons/IconUpload.mjs';
 
 interface Props {
   onUpload: (files: FileList) => void;

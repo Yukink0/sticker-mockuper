@@ -1,5 +1,5 @@
 import type { DragEvent } from 'react';
-import { IconX } from '@tabler/icons-react';
+import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 import type { StickerItem } from '../../types';
 
 interface Props {

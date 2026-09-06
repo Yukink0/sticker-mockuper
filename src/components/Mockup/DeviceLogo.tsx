@@ -1,4 +1,5 @@
-import { IconBrandApple, IconBrandWindows } from '@tabler/icons-react';
+import IconBrandApple from '@tabler/icons-react/dist/esm/icons/IconBrandApple.mjs';
+import IconBrandWindows from '@tabler/icons-react/dist/esm/icons/IconBrandWindows.mjs';
 import type { DeviceType, Maker } from '../../types';
 
 interface Props {

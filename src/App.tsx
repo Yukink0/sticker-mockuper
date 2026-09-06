@@ -7,8 +7,8 @@ import { StickerThumbnailList } from './components/Sidebar/StickerThumbnailList'
 import { ResetAllButton } from './components/Sidebar/ResetAllButton';
 import { MockupCanvas } from './components/Mockup/MockupCanvas';
 import { SaveImageButton } from './components/Mockup/SaveImageButton';
-import { StickerMark } from './components/StickerMark';
 import { getDefaultSize } from './config/devices';
+import logo from './assets/logo.png';
 import type {
   DeviceType,
   Maker,
@@ -112,13 +112,8 @@ export default function App() {
   return (
     <div className="sm-page">
       <header className="sm-header">
-        <span className="sm-header-mark">
-          <StickerMark />
-        </span>
-        <div>
-          <h1>Sticker Mockuper</h1>
-          <p>お手持ちのステッカーを、貼る前にシミュレーション</p>
-        </div>
+        <img src={logo} alt="Sticker Mockuper" className="sm-header-logo" />
+        <p className="sm-header-tagline">お手持ちのステッカーを、貼る前にシミュレーション</p>
       </header>
 
       <div className="sm-app">

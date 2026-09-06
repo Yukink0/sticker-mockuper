@@ -1,4 +1,8 @@
-import { IconDeviceLaptop, IconDeviceTablet, IconLuggage } from '@tabler/icons-react';
+// バレル(@tabler/icons-react)からの名前付きimportは、本番ビルド時に数千個ある
+// アイコンファイルすべてを解決しようとして極端に遅くなるため、個別ファイルから直接importする
+import IconDeviceLaptop from '@tabler/icons-react/dist/esm/icons/IconDeviceLaptop.mjs';
+import IconDeviceTablet from '@tabler/icons-react/dist/esm/icons/IconDeviceTablet.mjs';
+import IconLuggage from '@tabler/icons-react/dist/esm/icons/IconLuggage.mjs';
 import type { DeviceType } from '../../types';
 
 interface Props {

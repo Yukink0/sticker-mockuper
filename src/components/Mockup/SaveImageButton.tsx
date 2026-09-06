@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { RefObject } from 'react';
 import html2canvas from 'html2canvas';
-import { IconDownload } from '@tabler/icons-react';
+import IconDownload from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
 
 interface Props {
   targetRef: RefObject<HTMLDivElement | null>;
