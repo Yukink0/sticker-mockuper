@@ -14,7 +14,7 @@ export function DeviceLogo({ device, maker, iphoneModel, frameWidth }: Props) {
   const isIphone = device === 'iphone';
   const isIpad = device === 'ipad';
   const size = Math.round(
-    Math.min(Math.max(frameWidth * (isIphone ? 0.13 : 0.09), isIphone ? 20 : 14), 36),
+    Math.min(Math.max(frameWidth * (isIphone ? 0.13 : 0.1), isIphone ? 20 : 16), 38),
   );
 
   return (
