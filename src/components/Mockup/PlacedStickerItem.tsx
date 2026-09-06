@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 import type { PlacedSticker } from '../../types';
 
@@ -7,9 +7,9 @@ interface Props {
   selected: boolean;
   onSelect: () => void;
   onDelete: () => void;
-  onStartMove: (e: ReactMouseEvent) => void;
-  onStartResize: (e: ReactMouseEvent) => void;
-  onStartRotate: (e: ReactMouseEvent) => void;
+  onStartMove: (e: ReactPointerEvent) => void;
+  onStartResize: (e: ReactPointerEvent) => void;
+  onStartRotate: (e: ReactPointerEvent) => void;
 }
 
 export function PlacedStickerItem({
@@ -36,7 +36,7 @@ export function PlacedStickerItem({
         onSelect();
       }}
     >
-      <img src={sticker.src} alt="" draggable={false} onMouseDown={onStartMove} />
+      <img src={sticker.src} alt="" draggable={false} onPointerDown={onStartMove} />
       <button
         className="sm-x"
         aria-label="削除"
@@ -47,8 +47,8 @@ export function PlacedStickerItem({
       >
         <IconX size={11} aria-hidden />
       </button>
-      <div className="sm-rs" onMouseDown={onStartResize} />
-      <div className="sm-rotate" onMouseDown={onStartRotate} />
+      <div className="sm-rs" onPointerDown={onStartResize} />
+      <div className="sm-rotate" onPointerDown={onStartRotate} />
     </div>
   );
 }

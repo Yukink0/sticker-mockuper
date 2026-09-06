@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { DeviceSelector } from './components/Sidebar/DeviceSelector';
 import { MakerSelector } from './components/Sidebar/MakerSelector';
 import { SizeSelector } from './components/Sidebar/SizeSelector';
@@ -9,6 +10,7 @@ import { ResetAllButton } from './components/Sidebar/ResetAllButton';
 import { MockupCanvas } from './components/Mockup/MockupCanvas';
 import { SaveImageButton } from './components/Mockup/SaveImageButton';
 import { getDefaultSize } from './config/devices';
+import { computeInitialPlacement } from './utils/placement';
 import logo from './assets/logo.png';
 import type {
   DeviceType,
@@ -29,6 +31,9 @@ export default function App() {
   const [stickers, setStickers] = useState<StickerItem[]>([]);
   const [placed, setPlaced] = useState<PlacedSticker[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [dragPreview, setDragPreview] = useState<{ src: string; x: number; y: number } | null>(
+    null,
+  );
 
   const frameRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +71,46 @@ export default function App() {
   function handleAddPlaced(sticker: PlacedSticker) {
     setPlaced((prev) => [...prev, sticker]);
     setSelectedId(sticker.id);
+  }
+
+  // サムネイルからモックアップへの配置。マウスのドラッグ&ドロップだけでなく
+  // スマホ・タブレットのタッチでも同じように使えるよう、ネイティブのDrag and Drop
+  // APIには頼らずPointer Eventsだけで自前実装している。
+  function handleThumbPointerDown(sticker: StickerItem, e: ReactPointerEvent) {
+    e.preventDefault();
+    setDragPreview({ src: sticker.src, x: e.clientX, y: e.clientY });
+
+    function onMove(ev: PointerEvent) {
+      setDragPreview({ src: sticker.src, x: ev.clientX, y: ev.clientY });
+    }
+
+    function onUp(ev: PointerEvent) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      setDragPreview(null);
+
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      const isInsideFrame =
+        ev.clientX >= rect.left &&
+        ev.clientX <= rect.right &&
+        ev.clientY >= rect.top &&
+        ev.clientY <= rect.bottom;
+      if (!isInsideFrame) return;
+
+      const placement = computeInitialPlacement(ev.clientX, ev.clientY, rect, sticker.aspectRatio);
+      handleAddPlaced({
+        id: crypto.randomUUID(),
+        src: sticker.src,
+        aspectRatio: sticker.aspectRatio,
+        rotationDeg: 0,
+        ...placement,
+      });
+    }
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   }
 
   function handleUpdatePlaced(id: string, patch: Partial<PlacedSticker>) {
@@ -107,19 +152,6 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [selectedId]);
 
-  useEffect(() => {
-    // サムネイルを枠外にドロップした際、ブラウザが既定のドロップ動作
-    // （画像を別タブで開く等）を行わないようにする保険
-    function preventDefault(e: Event) {
-      e.preventDefault();
-    }
-    window.addEventListener('dragover', preventDefault);
-    window.addEventListener('drop', preventDefault);
-    return () => {
-      window.removeEventListener('dragover', preventDefault);
-      window.removeEventListener('drop', preventDefault);
-    };
-  }, []);
 
   return (
     <div className="sm-page">
@@ -137,7 +169,11 @@ export default function App() {
             <IphoneModelSelector model={iphoneModel} onSelect={setIphoneModel} />
           )}
           <StickerUploader onUpload={handleUpload} />
-          <StickerThumbnailList stickers={stickers} onDelete={handleDeleteSticker} />
+          <StickerThumbnailList
+            stickers={stickers}
+            onDelete={handleDeleteSticker}
+            onThumbPointerDown={handleThumbPointerDown}
+          />
           <ResetAllButton onReset={handleResetAll} />
         </div>
 
@@ -147,11 +183,9 @@ export default function App() {
             maker={maker}
             size={size}
             iphoneModel={iphoneModel}
-            stickers={stickers}
             placed={placed}
             selectedId={selectedId}
             frameRef={frameRef}
-            onAddPlaced={handleAddPlaced}
             onSelectPlaced={handleSelectPlaced}
             onDeselect={() => setSelectedId(null)}
             onUpdatePlaced={handleUpdatePlaced}
@@ -164,6 +198,15 @@ export default function App() {
       <footer className="sm-footer">
         <span className="sm-footer-brand">STICKER MOCKUPER</span> by CREATIVESTUDIOSNOW
       </footer>
+
+      {dragPreview && (
+        <img
+          src={dragPreview.src}
+          alt=""
+          className="sm-drag-preview"
+          style={{ left: dragPreview.x, top: dragPreview.y }}
+        />
+      )}
     </div>
   );
 }

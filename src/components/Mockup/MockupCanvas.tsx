@@ -1,5 +1,6 @@
-import type { DragEvent, MouseEvent as ReactMouseEvent, RefObject } from 'react';
+import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
 import { getFrameSize } from '../../config/devices';
+import { clamp, EDGE_MARGIN_PX, MIN_STICKER_SIZE_PX } from '../../utils/placement';
 import type {
   DeviceType,
   Maker,
@@ -7,7 +8,6 @@ import type {
   SurfaceSize,
   IphoneModel,
   PlacedSticker,
-  StickerItem,
 } from '../../types';
 import { DeviceLogo } from './DeviceLogo';
 import { PlacedStickerItem } from './PlacedStickerItem';
@@ -17,26 +17,13 @@ interface Props {
   maker: Maker;
   size: MacbookSize | SurfaceSize;
   iphoneModel: IphoneModel;
-  stickers: StickerItem[];
   placed: PlacedSticker[];
   selectedId: string | null;
   frameRef: RefObject<HTMLDivElement | null>;
-  onAddPlaced: (sticker: PlacedSticker) => void;
   onSelectPlaced: (id: string) => void;
   onDeselect: () => void;
   onUpdatePlaced: (id: string, patch: Partial<PlacedSticker>) => void;
   onDeletePlaced: (id: string) => void;
-}
-
-const INITIAL_WIDTH_PCT = 14;
-// フレームをoverflow:hiddenでクリップしているため、選択枠/削除・リサイズハンドルが
-// 縁で見切れないよう、配置可能な範囲に少し余白を持たせる
-const EDGE_MARGIN_PX = 10;
-// 小さすぎるとリサイズ/削除ハンドルが掴みにくくなるための下限
-const MIN_STICKER_SIZE_PX = 28;
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(value, max));
 }
 
 export function MockupCanvas({
@@ -44,11 +31,9 @@ export function MockupCanvas({
   maker,
   size,
   iphoneModel,
-  stickers,
   placed,
   selectedId,
   frameRef,
-  onAddPlaced,
   onSelectPlaced,
   onDeselect,
   onUpdatePlaced,
@@ -56,43 +41,9 @@ export function MockupCanvas({
 }: Props) {
   const frameSize = getFrameSize(device, maker, size, iphoneModel);
 
-  function handleDrop(e: DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    const stickerId = e.dataTransfer.getData('text/plain');
-    const source = stickers.find((s) => s.id === stickerId);
-    const frame = frameRef.current;
-    if (!source || !frame) return;
-
-    const rect = frame.getBoundingClientRect();
-    const wPct = INITIAL_WIDTH_PCT;
-    const wPx = (wPct / 100) * rect.width;
-    // 画像本来の縦横比を保ったまま高さを決める（強制正方形にしない）
-    const hPx = wPx / source.aspectRatio;
-    const hPct = (hPx / rect.height) * 100;
-    const xPx = clamp(
-      e.clientX - rect.left - wPx / 2,
-      EDGE_MARGIN_PX,
-      rect.width - wPx - EDGE_MARGIN_PX,
-    );
-    const yPx = clamp(
-      e.clientY - rect.top - hPx / 2,
-      EDGE_MARGIN_PX,
-      rect.height - hPx - EDGE_MARGIN_PX,
-    );
-
-    onAddPlaced({
-      id: crypto.randomUUID(),
-      src: source.src,
-      aspectRatio: source.aspectRatio,
-      xPct: (xPx / rect.width) * 100,
-      yPct: (yPx / rect.height) * 100,
-      wPct,
-      hPct,
-      rotationDeg: 0,
-    });
-  }
-
-  function startMove(e: ReactMouseEvent, id: string) {
+  // 移動・拡大縮小・回転はすべてPointer Events（マウス/タッチ/ペン共通）で扱う。
+  // これによりスマホ・タブレットでも同じ操作感で動く。
+  function startMove(e: ReactPointerEvent, id: string) {
     e.preventDefault();
     onSelectPlaced(id);
     const p = placed.find((x) => x.id === id);
@@ -107,7 +58,7 @@ export function MockupCanvas({
     const offX = e.clientX - rect.left - startXPx;
     const offY = e.clientY - rect.top - startYPx;
 
-    function onMove(ev: MouseEvent) {
+    function onMove(ev: PointerEvent) {
       const xPx = clamp(
         ev.clientX - rect.left - offX,
         EDGE_MARGIN_PX,
@@ -124,14 +75,14 @@ export function MockupCanvas({
       });
     }
     function onUp() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
     }
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   }
 
-  function startResize(e: ReactMouseEvent, id: string) {
+  function startResize(e: ReactPointerEvent, id: string) {
     e.preventDefault();
     e.stopPropagation();
     const p = placed.find((x) => x.id === id);
@@ -154,7 +105,7 @@ export function MockupCanvas({
     const maxWPxFromHeight = (rect.height - EDGE_MARGIN_PX - originYPx) * aspectRatio;
     const maxWPx = Math.min(maxWPxFromWidth, maxWPxFromHeight);
 
-    function onMove(ev: MouseEvent) {
+    function onMove(ev: PointerEvent) {
       const rawDx = ev.clientX - startX;
       const rawDy = ev.clientY - startY;
       const projected = rawDx * cos + rawDy * sin;
@@ -166,14 +117,14 @@ export function MockupCanvas({
       });
     }
     function onUp() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
     }
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   }
 
-  function startRotate(e: ReactMouseEvent, id: string) {
+  function startRotate(e: ReactPointerEvent, id: string) {
     e.preventDefault();
     e.stopPropagation();
     const p = placed.find((x) => x.id === id);
@@ -193,17 +144,17 @@ export function MockupCanvas({
       return (Math.atan2(dy, dx) * 180) / Math.PI + 90;
     }
 
-    function onMove(ev: MouseEvent) {
+    function onMove(ev: PointerEvent) {
       let deg = angleFromCenter(ev.clientX, ev.clientY);
       if (ev.shiftKey) deg = Math.round(deg / 15) * 15;
       onUpdatePlaced(id, { rotationDeg: deg });
     }
     function onUp() {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
     }
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
   }
 
   const variant =
@@ -214,8 +165,6 @@ export function MockupCanvas({
       ref={frameRef}
       className={`sm-mockup sm-mockup--${variant}`}
       style={{ width: frameSize.width, height: frameSize.height }}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={handleDrop}
       onClick={(e) => {
         if (e.target === e.currentTarget) onDeselect();
       }}
