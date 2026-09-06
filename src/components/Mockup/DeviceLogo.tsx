@@ -26,19 +26,21 @@ export function DeviceLogo({ device, maker, iphoneModel, frameWidth }: Props) {
         </div>
       )}
       {isIphone && iphoneModel === '17' && (
-        // iPhone 17（無印）は縦2眼の伝統的なカメラアイランド
+        // iPhone 17（無印）: 大きめの角丸スクエアに、斜め配置の2眼＋フラッシュ
         <div className="sm-camera-island">
-          <span className="sm-lens" />
-          <span className="sm-lens" />
+          <span className="sm-lens sm-lens--tl" />
+          <span className="sm-lens sm-lens--br" />
+          <span className="sm-lens sm-lens--flash sm-lens--island-flash" />
         </div>
       )}
       {isIphone && iphoneModel === '17pro' && (
-        // iPhone 17 Proは本体と同色の横長プレート（黒い別パーツではない）に
-        // 3眼レンズが並ぶ新デザイン
+        // iPhone 17 Pro: 本体と質感の異なる全幅プレートが滑らかな曲線で
+        // ボディに繋がり、横一列の3眼＋右上に小さなセンサー/フラッシュ
         <div className="sm-camera-plateau">
           <span className="sm-lens" />
           <span className="sm-lens" />
           <span className="sm-lens" />
+          <span className="sm-lens sm-lens--flash sm-lens--plateau-flash" />
         </div>
       )}
       <div className={`sm-logo${isIphone ? ' sm-logo--iphone' : ''}`}>
