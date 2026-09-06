@@ -298,13 +298,13 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* iPhone 17 Pro: 本体とわずかに質感の異なる左上の長方形プレート（角丸は均一）。
-   3眼は「縦2つ＋横に1つ」のL字（三角形）配置で、間隔は狭め・レンズは大きめ */
+/* iPhone 17 Pro: 本体とわずかに質感の異なる、上部にほぼ全幅で被さる長方形
+   プレート（角丸は均一）。3眼は左寄りに「縦2つ＋横に1つ」のL字配置 */
 .sm-camera-plateau {
   position: absolute;
   top: 6px;
   left: 6px;
-  width: 58%;
+  right: 6px;
   height: 30%;
   border-radius: 14px;
   background: linear-gradient(155deg, #eef0f1 0%, #d5d7da 100%);
