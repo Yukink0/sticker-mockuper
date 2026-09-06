@@ -298,45 +298,48 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* iPhone 17 Pro: 本体とわずかに質感の異なる全幅プレートが、丸みを帯びた
-   曲線でボディへ滑らかに繋がる。3眼は「縦2つ＋横に1つ」のL字（三角形）配置 */
+/* iPhone 17 Pro: 本体とわずかに質感の異なる左上の長方形プレート（角丸は均一）。
+   3眼は「縦2つ＋横に1つ」のL字（三角形）配置で、間隔は狭め・レンズは大きめ */
 .sm-camera-plateau {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 36%;
-  border-top-left-radius: inherit;
-  border-top-right-radius: inherit;
-  border-bottom-left-radius: 60% 20px;
-  border-bottom-right-radius: 60% 20px;
+  top: 6px;
+  left: 6px;
+  width: 58%;
+  height: 30%;
+  border-radius: 14px;
   background: linear-gradient(155deg, #eef0f1 0%, #d5d7da 100%);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+  box-shadow:
+    0 0.5px 1.5px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
 .sm-camera-plateau .sm-lens {
   position: absolute;
+  width: 13px;
+  height: 13px;
 }
 
 .sm-camera-plateau .sm-lens--tri-1 {
-  left: 13%;
-  top: 20%;
+  left: 14%;
+  top: 12%;
 }
 
 .sm-camera-plateau .sm-lens--tri-2 {
-  left: 13%;
-  top: 60%;
+  left: 14%;
+  top: 50%;
 }
 
 .sm-camera-plateau .sm-lens--tri-3 {
-  left: 32%;
-  top: 40%;
+  left: 42%;
+  top: 31%;
 }
 
 .sm-camera-plateau .sm-lens--plateau-flash {
-  top: 14%;
-  right: 10%;
+  top: 10%;
+  right: 8%;
   left: auto;
+  width: 5px;
+  height: 5px;
 }
 
 .sm-lens {
