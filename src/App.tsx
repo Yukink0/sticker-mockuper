@@ -125,7 +125,7 @@ export default function App() {
     <div className="sm-page">
       <header className="sm-header">
         <img src={logo} alt="Sticker Mockuper" className="sm-header-logo" />
-        <p className="sm-header-tagline">お手持ちのステッカーを、貼る前にシミュレーション</p>
+        <p className="sm-header-tagline">ステッカーを貼る前に、シミュレーション</p>
       </header>
 
       <div className="sm-app">
@@ -160,6 +160,8 @@ export default function App() {
           <SaveImageButton targetRef={frameRef} onBeforeCapture={() => setSelectedId(null)} />
         </div>
       </div>
+
+      <footer className="sm-footer">Powerd by CREATIVESTUDIOSNOW</footer>
     </div>
   );
 }
