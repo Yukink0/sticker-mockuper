@@ -199,18 +199,28 @@
     height 0.2s ease;
 }
 
-/* 金属っぽい光沢のオーバーレイ。デバイス共通で、質感の土台になる */
+/* 金属っぽい光沢＋ヘアライン加工のオーバーレイ。デバイス共通で、質感の土台になる */
 .sm-mockup::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 255, 255, 0) 32%,
-    rgba(255, 255, 255, 0) 68%,
-    rgba(0, 0, 0, 0.06) 100%
-  );
+  background-image:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0) 32%,
+      rgba(255, 255, 255, 0) 68%,
+      rgba(0, 0, 0, 0.07) 100%
+    ),
+    repeating-linear-gradient(
+      100deg,
+      rgba(255, 255, 255, 0.05) 0px,
+      rgba(255, 255, 255, 0.05) 1px,
+      rgba(0, 0, 0, 0.025) 2px,
+      rgba(0, 0, 0, 0.025) 3px
+    );
+  /* ふちに向けてわずかに沈み込む「エッジベベル」感 */
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
   pointer-events: none;
 }
 
@@ -239,66 +249,91 @@
 }
 
 .sm-mockup--ipad {
-  border-radius: 24px;
+  border-radius: 18px;
   background: linear-gradient(160deg, #f7f7f8 0%, #e4e5e7 50%, #d4d5d7 100%);
 }
 
 .sm-mockup--iphone-17,
 .sm-mockup--iphone-17pro {
-  border-radius: 20px;
+  border-radius: 22px;
   background: linear-gradient(160deg, #f5f5f6 0%, #e0e1e3 45%, #cbccce 100%);
 }
 
-.sm-camera {
+/* iPad Pro実機と同じく、本体と同系色の小さな丸角バンプに
+   単眼カメラ＋LiDAR/フラッシュを縦に収める。レンズだけが濃色。 */
+.sm-camera-bump {
   position: absolute;
-  top: 6%;
-  left: 9%;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #7a7e84, #1e1f21 72%);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  top: 5%;
+  left: 8%;
+  width: 15px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(155deg, #dcddde, #c0c2c5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 3px 0;
+  box-shadow:
+    0 0.5px 1.5px rgba(0, 0, 0, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* iPhone 17: 左上の2眼カメラアイランド */
+/* iPhone 17: 左上の縦2眼カメラアイランド（本体色のバンプ＋濃色レンズ） */
 .sm-camera-island {
   position: absolute;
   top: 8px;
   left: 8px;
   width: 22px;
-  height: 22px;
-  border-radius: 8px;
-  background: linear-gradient(155deg, #55585e, #1c1d1f);
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(155deg, #e2e3e5, #c5c7ca);
   display: flex;
-  flex-wrap: wrap;
-  align-content: space-evenly;
+  flex-direction: column;
+  align-items: center;
   justify-content: space-evenly;
-  padding: 3px;
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12);
+  padding: 4px 0;
+  box-shadow:
+    0 0.5px 1.5px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* iPhone 17 Pro: 上部の横長3眼カメラプレート */
+/* iPhone 17 Pro: 本体と同色の横長プレート（黒い別パーツではない）に3眼レンズ */
 .sm-camera-plateau {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  height: 20px;
-  border-radius: 11px;
-  background: linear-gradient(155deg, #55585e, #1c1d1f);
+  top: 7px;
+  left: 6px;
+  right: 6px;
+  height: 24px;
+  border-radius: 12px;
+  background: linear-gradient(155deg, #e6e7e9, #c9cbce);
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  padding: 0 6px;
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.12);
+  padding: 0 10px;
+  box-shadow:
+    0 0.5px 1.5px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-.sm-camera-lens {
-  width: 7px;
-  height: 7px;
+.sm-lens {
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #7a7e84, #050505 75%);
-  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+  background: radial-gradient(circle at 35% 35%, #6b6f75, #0b0c0d 75%);
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.15);
+}
+
+.sm-lens--main {
+  width: 10px;
+  height: 10px;
+}
+
+.sm-lens--flash {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle at 35% 35%, #d9e0ec, #97a1b3 70%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 .sm-logo {
