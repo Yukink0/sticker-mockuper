@@ -35,7 +35,11 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
       // 選択枠・削除ボタン・リサイズハンドルが写り込まないよう、選択解除してから撮影する
       onBeforeCapture();
       await waitForNextPaint();
-      const canvas = await html2canvas(targetRef.current, { backgroundColor: null, scale: 2 });
+      const canvas = await html2canvas(targetRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+      });
 
       // iOS Safari等は<a download>にほぼ対応していないため、Web Share API（ファイル共有）が
       // 使える場合はそちらを優先する。ネイティブの共有シートに「画像を保存」等が含まれる。
@@ -58,6 +62,12 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
       }
 
       downloadCanvas(canvas);
+    } catch (err) {
+      // 失敗時に何も起きないと原因が分からなくなるため、必ずユーザーに知らせる
+      console.error('画像の保存に失敗しました', err);
+      window.alert(
+        `画像の保存に失敗しました。\n${err instanceof Error ? err.message : String(err)}`,
+      );
     } finally {
       setSaving(false);
     }
