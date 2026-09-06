@@ -255,7 +255,7 @@
 
 .sm-mockup--iphone-17,
 .sm-mockup--iphone-17pro {
-  border-radius: 22px;
+  border-radius: 15px;
   background: linear-gradient(160deg, #f5f5f6 0%, #e0e1e3 45%, #cbccce 100%);
 }
 
@@ -279,42 +279,27 @@
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-/* iPhone 17: 左上の大きめ角丸スクエアに、斜め配置の2眼＋フラッシュ
-   （2025年実機の見た目に合わせ、アイランド自体を大きめにしている） */
+/* iPhone 17: 縦長長方形の台座に、レンズを縦に2つ並べる */
 .sm-camera-island {
   position: absolute;
   top: 6px;
   left: 6px;
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 20px;
+  height: 38px;
+  border-radius: 10px;
   background: linear-gradient(155deg, #e6e7e9, #c7c9cc);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 5px 0;
   box-shadow:
     0 0.5px 1.5px rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
 }
 
-.sm-camera-island .sm-lens--tl {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-}
-
-.sm-camera-island .sm-lens--br {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-}
-
-.sm-camera-island .sm-lens--island-flash {
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  transform: translateY(-50%);
-}
-
 /* iPhone 17 Pro: 本体とわずかに質感の異なる全幅プレートが、丸みを帯びた
-   曲線でボディへ滑らかに繋がる。横一列の3眼＋右上に小さなセンサー/フラッシュ */
+   曲線でボディへ滑らかに繋がる。3眼は「縦2つ＋横に1つ」のL字（三角形）配置 */
 .sm-camera-plateau {
   position: absolute;
   top: 0;
@@ -331,19 +316,21 @@
 
 .sm-camera-plateau .sm-lens {
   position: absolute;
-  top: 30%;
 }
 
-.sm-camera-plateau .sm-lens:nth-of-type(1) {
-  left: 14%;
+.sm-camera-plateau .sm-lens--tri-1 {
+  left: 13%;
+  top: 20%;
 }
 
-.sm-camera-plateau .sm-lens:nth-of-type(2) {
-  left: 34%;
+.sm-camera-plateau .sm-lens--tri-2 {
+  left: 13%;
+  top: 60%;
 }
 
-.sm-camera-plateau .sm-lens:nth-of-type(3) {
-  left: 54%;
+.sm-camera-plateau .sm-lens--tri-3 {
+  left: 32%;
+  top: 40%;
 }
 
 .sm-camera-plateau .sm-lens--plateau-flash {
@@ -380,10 +367,6 @@
   color: var(--text-muted);
   opacity: 0.7;
   pointer-events: none;
-}
-
-.sm-logo--iphone {
-  top: 64%;
 }
 
 .sm-placed {

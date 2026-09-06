@@ -13,7 +13,9 @@ export function DeviceLogo({ device, maker, iphoneModel, frameWidth }: Props) {
   const showApple = device !== 'pc' || maker === 'macbook';
   const isIphone = device === 'iphone';
   const isIpad = device === 'ipad';
-  const size = Math.round(Math.min(Math.max(frameWidth * (isIphone ? 0.06 : 0.09), 14), 36));
+  const size = Math.round(
+    Math.min(Math.max(frameWidth * (isIphone ? 0.13 : 0.09), isIphone ? 20 : 14), 36),
+  );
 
   return (
     <>
@@ -26,24 +28,23 @@ export function DeviceLogo({ device, maker, iphoneModel, frameWidth }: Props) {
         </div>
       )}
       {isIphone && iphoneModel === '17' && (
-        // iPhone 17（無印）: 大きめの角丸スクエアに、斜め配置の2眼＋フラッシュ
+        // iPhone 17（無印）: 縦長長方形の台座に、レンズを縦に2つ並べる
         <div className="sm-camera-island">
-          <span className="sm-lens sm-lens--tl" />
-          <span className="sm-lens sm-lens--br" />
-          <span className="sm-lens sm-lens--flash sm-lens--island-flash" />
+          <span className="sm-lens" />
+          <span className="sm-lens" />
         </div>
       )}
       {isIphone && iphoneModel === '17pro' && (
-        // iPhone 17 Pro: 本体と質感の異なる全幅プレートが滑らかな曲線で
-        // ボディに繋がり、横一列の3眼＋右上に小さなセンサー/フラッシュ
+        // iPhone 17 Pro: 本体と質感の異なる全幅プレートの中で、
+        // 3眼レンズを「縦2つ＋横に1つ」のL字（三角形）配置にする
         <div className="sm-camera-plateau">
-          <span className="sm-lens" />
-          <span className="sm-lens" />
-          <span className="sm-lens" />
+          <span className="sm-lens sm-lens--tri-1" />
+          <span className="sm-lens sm-lens--tri-2" />
+          <span className="sm-lens sm-lens--tri-3" />
           <span className="sm-lens sm-lens--flash sm-lens--plateau-flash" />
         </div>
       )}
-      <div className={`sm-logo${isIphone ? ' sm-logo--iphone' : ''}`}>
+      <div className="sm-logo">
         {showApple ? (
           <IconBrandApple size={size} aria-hidden />
         ) : (
