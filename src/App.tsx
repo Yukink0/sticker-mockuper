@@ -161,7 +161,9 @@ export default function App() {
         </div>
       </div>
 
-      <footer className="sm-footer">by CREATIVESTUDIOSNOW</footer>
+      <footer className="sm-footer">
+        <span className="sm-footer-brand">STICKER MOCKUPER</span> by CREATIVESTUDIOSNOW
+      </footer>
     </div>
   );
 }
