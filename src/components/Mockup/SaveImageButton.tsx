@@ -18,15 +18,12 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
   return new Promise((resolve) => canvas.toBlob((blob) => resolve(blob), 'image/png'));
 }
 
-function downloadCanvas(canvas: HTMLCanvasElement) {
-  const link = document.createElement('a');
-  link.download = 'sticker-mockup.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-}
-
 export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
   const [saving, setSaving] = useState(false);
+  // Web Shareが使えない/失敗した場合のフォールバック用：生成した画像をその場に表示し、
+  // 長押し（OS標準の「写真に追加」）で保存してもらう。<a download>はiOS Safariで
+  // ほぼ機能しないため、これが確実に効く手段になる。
+  const [previewSrc, setPreviewSrc] = useState<string | null>(null);
 
   async function handleSave() {
     if (!targetRef.current || saving) return;
@@ -41,8 +38,8 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
         useCORS: true,
       });
 
-      // iOS Safari等は<a download>にほぼ対応していないため、Web Share API（ファイル共有）が
-      // 使える場合はそちらを優先する。ネイティブの共有シートに「画像を保存」等が含まれる。
+      // 対応環境ではWeb Share APIを優先する。ネイティブの共有シートに
+      // 「画像を保存」等が含まれる、一番スムーズな体験になるため。
       const blob = await canvasToBlob(canvas);
       const file = blob ? new File([blob], 'sticker-mockup.png', { type: 'image/png' }) : null;
       const nav = navigator as Navigator & {
@@ -54,14 +51,12 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
         try {
           await nav.share({ files: [file], title: 'Sticker Mockup' });
           return;
-        } catch (err) {
-          // ユーザーが共有シートをキャンセルした場合は何もしない
-          if (err instanceof DOMException && err.name === 'AbortError') return;
-          // それ以外の失敗時はダウンロード方式にフォールバックする
+        } catch {
+          // 共有シートのキャンセル・失敗時は下のプレビュー表示にフォールバックする
         }
       }
 
-      downloadCanvas(canvas);
+      setPreviewSrc(canvas.toDataURL('image/png'));
     } catch (err) {
       // 失敗時に何も起きないと原因が分からなくなるため、必ずユーザーに知らせる
       console.error('画像の保存に失敗しました', err);
@@ -74,9 +69,30 @@ export function SaveImageButton({ targetRef, onBeforeCapture }: Props) {
   }
 
   return (
-    <button className="sm-btn sm-save" onClick={handleSave} disabled={saving}>
-      <IconDownload size={14} aria-hidden />
-      {saving ? '保存中…' : '画像として保存'}
-    </button>
+    <>
+      <button className="sm-btn sm-save" onClick={handleSave} disabled={saving}>
+        <IconDownload size={14} aria-hidden />
+        {saving ? '保存中…' : '画像として保存'}
+      </button>
+
+      {previewSrc && (
+        <div className="sm-save-modal-backdrop" onClick={() => setPreviewSrc(null)}>
+          <div className="sm-save-modal" onClick={(e) => e.stopPropagation()}>
+            <p className="sm-save-modal-hint">
+              画像を長押しして「写真に追加」を選ぶと保存できます
+            </p>
+            <img src={previewSrc} alt="モックアップ画像" className="sm-save-modal-img" />
+            <div className="sm-save-modal-actions">
+              <a href={previewSrc} download="sticker-mockup.png" className="sm-btn sm-save">
+                ダウンロード
+              </a>
+              <button className="sm-btn" onClick={() => setPreviewSrc(null)}>
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
