@@ -6,6 +6,7 @@ import { SizeSelector } from './components/Sidebar/SizeSelector';
 import { IphoneModelSelector } from './components/Sidebar/IphoneModelSelector';
 import { StickerUploader } from './components/Sidebar/StickerUploader';
 import { StickerThumbnailList } from './components/Sidebar/StickerThumbnailList';
+import { CropModal } from './components/Sidebar/CropModal';
 import { ResetAllButton } from './components/Sidebar/ResetAllButton';
 import { MockupCanvas } from './components/Mockup/MockupCanvas';
 import { SaveImageButton } from './components/Mockup/SaveImageButton';
@@ -34,6 +35,7 @@ export default function App() {
   const [dragPreview, setDragPreview] = useState<{ src: string; x: number; y: number } | null>(
     null,
   );
+  const [cropTarget, setCropTarget] = useState<StickerItem | null>(null);
 
   const frameRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +68,15 @@ export default function App() {
 
   function handleDeleteSticker(id: string) {
     setStickers((prev) => prev.filter((s) => s.id !== id));
+  }
+
+  // トリミングは確定した画像・縦横比でサムネイルを置き換えるだけで、
+  // 既に配置済みのステッカーはその時点の画像のまま変えない
+  function handleCropConfirm(id: string, croppedSrc: string, aspectRatio: number) {
+    setStickers((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, src: croppedSrc, aspectRatio } : s)),
+    );
+    setCropTarget(null);
   }
 
   function handleAddPlaced(sticker: PlacedSticker) {
@@ -173,6 +184,7 @@ export default function App() {
             stickers={stickers}
             onDelete={handleDeleteSticker}
             onThumbPointerDown={handleThumbPointerDown}
+            onCropSticker={setCropTarget}
           />
           <ResetAllButton onReset={handleResetAll} />
         </div>
@@ -205,6 +217,16 @@ export default function App() {
           alt=""
           className="sm-drag-preview"
           style={{ left: dragPreview.x, top: dragPreview.y }}
+        />
+      )}
+
+      {cropTarget && (
+        <CropModal
+          src={cropTarget.src}
+          onCancel={() => setCropTarget(null)}
+          onConfirm={(croppedSrc, aspectRatio) =>
+            handleCropConfirm(cropTarget.id, croppedSrc, aspectRatio)
+          }
         />
       )}
     </div>

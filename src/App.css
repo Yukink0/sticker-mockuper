@@ -175,6 +175,27 @@
   transform: scale(1.12);
 }
 
+.sm-crop-trigger {
+  position: absolute;
+  bottom: -5px;
+  left: -5px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--fill-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1.5px solid var(--surface-2);
+  transition: transform 0.1s ease;
+}
+
+.sm-crop-trigger:hover {
+  transform: scale(1.12);
+}
+
 .sm-main {
   flex: 1;
   min-width: 300px;
@@ -566,4 +587,110 @@
 .sm-save-modal-actions {
   display: flex;
   gap: 8px;
+}
+
+/* ステッカー画像のトリミングモーダル。保存モーダルと同じ土台に、
+   四隅ハンドル付きのトリミング範囲選択ステージを重ねる */
+.sm-crop-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 25, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 100;
+}
+
+.sm-crop-modal {
+  background: var(--surface-2);
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.sm-crop-stage {
+  position: relative;
+  /* サムネイルと同じ市松の透過チェッカーで、切り出し範囲外が透明になることを分かりやすくする */
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.06) 75%);
+  background-size: 16px 16px;
+  background-position:
+    0 0,
+    0 8px,
+    8px -8px,
+    -8px 0;
+  border-radius: 4px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.sm-crop-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* トリミング範囲の外側を暗くして、選択中の範囲だけが分かるようにする */
+.sm-crop-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.sm-crop-box {
+  position: absolute;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px var(--fill-accent);
+  cursor: move;
+  touch-action: none;
+}
+
+.sm-crop-handle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--fill-accent);
+  border: 1.5px solid #fff;
+  touch-action: none;
+}
+
+.sm-crop-handle--nw {
+  top: -8px;
+  left: -8px;
+  cursor: nwse-resize;
+}
+
+.sm-crop-handle--ne {
+  top: -8px;
+  right: -8px;
+  cursor: nesw-resize;
+}
+
+.sm-crop-handle--sw {
+  bottom: -8px;
+  left: -8px;
+  cursor: nesw-resize;
+}
+
+.sm-crop-handle--se {
+  bottom: -8px;
+  right: -8px;
+  cursor: nwse-resize;
 }

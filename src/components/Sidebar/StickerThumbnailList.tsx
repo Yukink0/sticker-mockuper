@@ -1,14 +1,21 @@
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
+import IconCrop from '@tabler/icons-react/dist/esm/icons/IconCrop.mjs';
 import type { StickerItem } from '../../types';
 
 interface Props {
   stickers: StickerItem[];
   onDelete: (id: string) => void;
   onThumbPointerDown: (sticker: StickerItem, e: ReactPointerEvent) => void;
+  onCropSticker: (sticker: StickerItem) => void;
 }
 
-export function StickerThumbnailList({ stickers, onDelete, onThumbPointerDown }: Props) {
+export function StickerThumbnailList({
+  stickers,
+  onDelete,
+  onThumbPointerDown,
+  onCropSticker,
+}: Props) {
   return (
     <div>
       <div className="sm-label">アップロード済み（ドラッグして配置）</div>
@@ -28,6 +35,14 @@ export function StickerThumbnailList({ stickers, onDelete, onThumbPointerDown }:
               onClick={() => onDelete(s.id)}
             >
               <IconX size={10} aria-hidden />
+            </button>
+            <button
+              className="sm-crop-trigger"
+              aria-label="トリミング"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onCropSticker(s)}
+            >
+              <IconCrop size={10} aria-hidden />
             </button>
           </div>
         ))}
