@@ -2,8 +2,8 @@ import { useState } from 'react';
 import type { RefObject } from 'react';
 import html2canvas from 'html2canvas';
 import IconDownload from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
-import { clamp } from '../../utils/placement';
 import qrCode from '../../assets/qrcode.png';
+import logo from '../../assets/logo.png';
 
 interface Props {
   targetRef: RefObject<HTMLDivElement | null>;
@@ -14,6 +14,19 @@ interface Props {
 const BRAND_PINK = '#ff6fa5';
 const BRAND_INDIGO = '#18016c';
 const CARD_BG = '#f4f2ee';
+
+// 保存画像はデバイスの種類によらず常に1000×1000の正方形にする。
+// モックアップ本体はアスペクト比を保ったまま中央のスペースに収める(contain)。
+const CARD_SIZE = 1000;
+const PADDING = 60;
+const LABEL_FONT_PX = 42;
+const LABEL_AREA_H = 64;
+const GAP_TOP = 22;
+const FOOTER_AREA_H = 80;
+const GAP_BOTTOM = 22;
+const QR_SIZE = 60;
+const LOGO_H = 34;
+const FOOTER_SUB_PX = 20;
 
 function waitForNextPaint() {
   return new Promise<void>((resolve) => {
@@ -45,98 +58,69 @@ function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: n
 }
 
 /**
- * 撮影したモックアップ画像に、左上のデバイス名・右下のブランド表記・
- * 左下のQRコードを添えた「作品カード」を合成する。SNS等でそのまま
- * シェアされることを想定した名刺代わりの見た目にするための加工。
+ * 撮影したモックアップ画像に、左上のデバイス名・右下のブランドロゴ・
+ * 左下のQRコードを添えた、1000×1000の正方形の「作品カード」を合成する。
+ * SNS等でそのままシェアされることを想定した名刺代わりの見た目にするための加工。
  */
 async function composeBrandedCard(deviceCanvas: HTMLCanvasElement, deviceLabel: string) {
-  const qrImg = await loadImage(qrCode);
-
-  // デバイスの大小（MacBook〜iPhone）で見栄えが崩れないよう、
-  // 余白・文字サイズはすべてキャプチャ画像の幅を基準にした相対値にする
-  const padding = clamp(deviceCanvas.width * 0.11, 36, 90);
-  const labelFontPx = clamp(deviceCanvas.width * 0.085, 20, 46);
-  const footerBrandPx = clamp(deviceCanvas.width * 0.055, 14, 26);
-  const footerSubPx = footerBrandPx * 0.62;
-  const qrSize = clamp(deviceCanvas.width * 0.15, 44, 84);
+  const [qrImg, logoImg] = await Promise.all([loadImage(qrCode), loadImage(logo)]);
 
   try {
     await Promise.all([
-      document.fonts.load(`${labelFontPx}px Monoton`),
-      document.fonts.load(`${footerBrandPx}px Rosario`),
-      document.fonts.load(`${footerSubPx}px Rosario`),
+      document.fonts.load(`${LABEL_FONT_PX}px Monoton`),
+      document.fonts.load(`${FOOTER_SUB_PX}px Rosario`),
     ]);
   } catch {
     // フォントの先読みに失敗しても、代替フォントで描画を続ける
   }
 
-  const labelAreaH = labelFontPx * 1.7;
-  const footerH = Math.max(qrSize, footerBrandPx + footerSubPx + 10) * 1.2;
-  const gapTop = labelAreaH * 0.35;
-  const gapBottom = footerH * 0.3;
-  const footerGap = qrSize * 0.4;
-  const brandText = 'STICKER MOCKUPER';
-
-  // 文字幅の計測用に、まだサイズを決めていない仮のコンテキストを使う
-  const measureCtx = document.createElement('canvas').getContext('2d')!;
-  measureCtx.font = `${footerBrandPx}px 'Rosario', sans-serif`;
-  const brandWidth = measureCtx.measureText(brandText).width;
-  measureCtx.font = `${labelFontPx}px Monoton, cursive`;
-  const labelWidth = measureCtx.measureText(deviceLabel).width;
-
-  // iPhoneのような横幅の狭いデバイスでは、QRコードとブランド文字が並ぶのに
-  // 必要な幅がモックアップ自体の幅を超えることがある。その場合はコンテンツ幅を
-  // footer側に合わせて広げ、モックアップを中央寄せすることで重なりを防ぐ
-  const footerRowWidth = qrSize + footerGap + brandWidth;
-  const contentWidth = Math.max(deviceCanvas.width, footerRowWidth, labelWidth);
-
-  const cardW = contentWidth + padding * 2;
-  const cardH = padding * 2 + labelAreaH + gapTop + deviceCanvas.height + gapBottom + footerH;
-
   const card = document.createElement('canvas');
-  card.width = cardW;
-  card.height = cardH;
+  card.width = CARD_SIZE;
+  card.height = CARD_SIZE;
   const ctx = card.getContext('2d');
   if (!ctx) return deviceCanvas;
 
-  roundRectPath(ctx, 0, 0, cardW, cardH, clamp(deviceCanvas.width * 0.035, 14, 32));
+  roundRectPath(ctx, 0, 0, CARD_SIZE, CARD_SIZE, 28);
   ctx.fillStyle = CARD_BG;
   ctx.fill();
 
   // 左上：デバイス名（Monotonのブロック体＋ブランドカラーのグラデーション）
-  ctx.font = `${labelFontPx}px Monoton, cursive`;
+  ctx.font = `${LABEL_FONT_PX}px Monoton, cursive`;
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
-  const labelGrad = ctx.createLinearGradient(padding, 0, padding + labelWidth, 0);
+  const labelWidth = ctx.measureText(deviceLabel).width;
+  const labelGrad = ctx.createLinearGradient(PADDING, 0, PADDING + labelWidth, 0);
   labelGrad.addColorStop(0, BRAND_PINK);
   labelGrad.addColorStop(1, BRAND_INDIGO);
   ctx.fillStyle = labelGrad;
-  ctx.fillText(deviceLabel, padding, padding + labelAreaH / 2);
+  ctx.fillText(deviceLabel, PADDING, PADDING + LABEL_AREA_H / 2);
 
-  // 中央：撮影したモックアップ本体（コンテンツ幅の方が広い場合は水平中央寄せ）
-  const mockupX = padding + (contentWidth - deviceCanvas.width) / 2;
-  const mockupY = padding + labelAreaH + gapTop;
-  ctx.drawImage(deviceCanvas, mockupX, mockupY, deviceCanvas.width, deviceCanvas.height);
+  // 中央：撮影したモックアップ本体を、アスペクト比を保ったまま中段のスペースに収める
+  const footerY = CARD_SIZE - PADDING - FOOTER_AREA_H;
+  const regionX = PADDING;
+  const regionY = PADDING + LABEL_AREA_H + GAP_TOP;
+  const regionW = CARD_SIZE - PADDING * 2;
+  const regionH = footerY - GAP_BOTTOM - regionY;
+  const scale = Math.min(regionW / deviceCanvas.width, regionH / deviceCanvas.height);
+  const drawW = deviceCanvas.width * scale;
+  const drawH = deviceCanvas.height * scale;
+  const drawX = regionX + (regionW - drawW) / 2;
+  const drawY = regionY + (regionH - drawH) / 2;
+  ctx.drawImage(deviceCanvas, drawX, drawY, drawW, drawH);
 
   // 左下：QRコード
-  const footerY = mockupY + deviceCanvas.height + gapBottom;
-  const qrY = footerY + (footerH - qrSize) / 2;
-  ctx.drawImage(qrImg, padding, qrY, qrSize, qrSize);
+  const footerCenterY = footerY + FOOTER_AREA_H / 2;
+  ctx.drawImage(qrImg, PADDING, footerCenterY - QR_SIZE / 2, QR_SIZE, QR_SIZE);
 
-  // 右下：「Made by STICKER MOCKUPER」
-  const footerCenterY = footerY + footerH / 2;
-  const footerRight = cardW - padding;
-  ctx.textAlign = 'right';
+  // 右下：「Made by」＋ブランドロゴ
+  const logoW = LOGO_H * (logoImg.naturalWidth / logoImg.naturalHeight);
+  const logoX = CARD_SIZE - PADDING - logoW;
+  ctx.drawImage(logoImg, logoX, footerCenterY - LOGO_H / 2, logoW, LOGO_H);
+
+  ctx.font = `${FOOTER_SUB_PX}px 'Rosario', sans-serif`;
   ctx.fillStyle = '#8a8578';
-  ctx.font = `${footerSubPx}px 'Rosario', sans-serif`;
-  ctx.fillText('Made by', footerRight, footerCenterY - footerSubPx * 0.75);
-
-  ctx.font = `${footerBrandPx}px 'Rosario', sans-serif`;
-  const brandGrad = ctx.createLinearGradient(footerRight - brandWidth, 0, footerRight, 0);
-  brandGrad.addColorStop(0, BRAND_INDIGO);
-  brandGrad.addColorStop(1, BRAND_PINK);
-  ctx.fillStyle = brandGrad;
-  ctx.fillText(brandText, footerRight, footerCenterY + footerBrandPx * 0.6);
+  ctx.textAlign = 'right';
+  ctx.fillText('Made by', logoX - 10, footerCenterY);
 
   return card;
 }
