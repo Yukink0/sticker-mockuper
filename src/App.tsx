@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
+import { Analytics, track } from '@vercel/analytics/react';
 import { DeviceSelector } from './components/Sidebar/DeviceSelector';
 import { MakerSelector } from './components/Sidebar/MakerSelector';
 import { SizeSelector } from './components/Sidebar/SizeSelector';
@@ -151,6 +152,13 @@ export default function App() {
     setSelectedId(id);
   }
 
+  // デバイスカテゴリの内訳を見るための計測。サイズ変更(size)では発火させず、
+  // 「どの機種を見ていたか」が変わったときだけ送る
+  useEffect(() => {
+    track('device_selected', { device: getDeviceLabel(device, maker, size, iphoneModel) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [device, maker, iphoneModel]);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -166,6 +174,7 @@ export default function App() {
 
   return (
     <div className="sm-page">
+      <Analytics />
       <header className="sm-header">
         <img src={logo} alt="Sticker Mockuper" className="sm-header-logo" />
         <p className="sm-header-tagline">ステッカーを貼る前に、シミュレーション</p>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RefObject } from 'react';
 import html2canvas from 'html2canvas';
+import { track } from '@vercel/analytics/react';
 import IconDownload from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
 import qrCode from '../../assets/qrcode.png';
 import logo from '../../assets/logo.png';
@@ -145,6 +146,10 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
         useCORS: true,
       });
       const canvas = await composeBrandedCard(deviceCanvas, deviceLabel);
+
+      // モックアップ生成数の計測。共有/ダウンロードどちらに進むかに関わらず、
+      // ここまで到達すれば「1件生成できた」とみなす
+      track('mockup_generated', { device: deviceLabel });
 
       // 対応環境ではWeb Share APIを優先する。ネイティブの共有シートに
       // 「画像を保存」等が含まれる、一番スムーズな体験になるため。
