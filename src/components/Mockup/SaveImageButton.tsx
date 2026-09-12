@@ -48,6 +48,16 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+// Web Share（OSの共有シート）はスマホ・タブレットの「そのまま写真に保存」体験のために
+// 用意したもので、タッチのないデスクトップでは余計なポップアップが挟まるだけになる。
+// iPadOSはUAをMacintoshと偽装するため、マルチタッチの有無も合わせて判定する。
+function isTouchLikeDevice() {
+  const ua = navigator.userAgent;
+  if (/Android|iPhone|iPod/i.test(ua)) return true;
+  if (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return true;
+  return false;
+}
+
 function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
@@ -63,7 +73,11 @@ function roundRectPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: n
  * 左下のQRコードを添えた、1000×1000の正方形の「作品カード」を合成する。
  * SNS等でそのままシェアされることを想定した名刺代わりの見た目にするための加工。
  */
-async function composeBrandedCard(deviceCanvas: HTMLCanvasElement, deviceLabel: string) {
+async function composeBrandedCard(
+  deviceCanvas: HTMLCanvasElement,
+  deviceLabel: string,
+  mockupRadiusRatio: number,
+) {
   const [qrImg, logoImg] = await Promise.all([loadImage(qrCode), loadImage(logo)]);
 
   try {
@@ -107,7 +121,15 @@ async function composeBrandedCard(deviceCanvas: HTMLCanvasElement, deviceLabel: 
   const drawH = deviceCanvas.height * scale;
   const drawX = regionX + (regionW - drawW) / 2;
   const drawY = regionY + (regionH - drawH) / 2;
+
+  // html2canvas は角丸+overflow:hiddenのクリッピングを取りこぼし、角に本体色と
+  // 違う色のパッチが残ることがある。実際の角丸に合わせて自前で再クリップして
+  // 見た目を保証する。
+  ctx.save();
+  roundRectPath(ctx, drawX, drawY, drawW, drawH, mockupRadiusRatio * drawW);
+  ctx.clip();
   ctx.drawImage(deviceCanvas, drawX, drawY, drawW, drawH);
+  ctx.restore();
 
   // 左下：QRコード
   const footerCenterY = footerY + FOOTER_AREA_H / 2;
@@ -140,19 +162,28 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
       // 選択枠・削除ボタン・リサイズハンドルが写り込まないよう、選択解除してから撮影する
       onBeforeCapture();
       await waitForNextPaint();
+
+      // 実物の角丸を、後段の再クリップに使えるよう幅に対する比率で控えておく
+      const mockupEl = targetRef.current;
+      const mockupWidthCss = mockupEl.getBoundingClientRect().width;
+      const borderRadiusCss = parseFloat(getComputedStyle(mockupEl).borderRadius) || 0;
+      const mockupRadiusRatio = mockupWidthCss > 0 ? borderRadiusCss / mockupWidthCss : 0;
+
       const deviceCanvas = await html2canvas(targetRef.current, {
         backgroundColor: null,
         scale: 2,
         useCORS: true,
       });
-      const canvas = await composeBrandedCard(deviceCanvas, deviceLabel);
+      const canvas = await composeBrandedCard(deviceCanvas, deviceLabel, mockupRadiusRatio);
 
       // モックアップ生成数の計測。共有/ダウンロードどちらに進むかに関わらず、
       // ここまで到達すれば「1件生成できた」とみなす
       track('mockup_generated', { device: deviceLabel });
 
-      // 対応環境ではWeb Share APIを優先する。ネイティブの共有シートに
+      // スマホ・タブレットではWeb Share APIを優先する。ネイティブの共有シートに
       // 「画像を保存」等が含まれる、一番スムーズな体験になるため。
+      // デスクトップ（タッチのないMac/Windows等）ではOSの共有ポップアップが
+      // 挟まるだけで体験が悪いので、最初からプレビューモーダルを出す。
       const blob = await canvasToBlob(canvas);
       const file = blob ? new File([blob], 'sticker-mockup.png', { type: 'image/png' }) : null;
       const nav = navigator as Navigator & {
@@ -160,7 +191,7 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
         share?: (data: { files?: File[]; title?: string }) => Promise<void>;
       };
 
-      if (file && nav.canShare?.({ files: [file] }) && nav.share) {
+      if (isTouchLikeDevice() && file && nav.canShare?.({ files: [file] }) && nav.share) {
         try {
           await nav.share({ files: [file], title: 'Sticker Mockup' });
           return;
