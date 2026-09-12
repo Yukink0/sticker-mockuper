@@ -65,3 +65,15 @@ export function getSizesForMaker(maker: Maker): (MacbookSize | SurfaceSize)[] {
 export function getDefaultSize(maker: Maker): MacbookSize | SurfaceSize {
   return maker === 'macbook' ? '14' : '13.5';
 }
+
+/** 「画像として保存」した画像に添えるデバイス名ラベル */
+export function getDeviceLabel(
+  device: DeviceType,
+  maker: Maker,
+  size: MacbookSize | SurfaceSize,
+  iphoneModel: IphoneModel,
+): string {
+  if (device === 'ipad') return 'iPad';
+  if (device === 'iphone') return IPHONE_MODEL_LABELS[iphoneModel];
+  return `${maker === 'macbook' ? 'MacBook' : 'Surface'}${size}"`;
+}

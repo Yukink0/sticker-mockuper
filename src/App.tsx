@@ -10,7 +10,7 @@ import { CropModal } from './components/Sidebar/CropModal';
 import { ResetAllButton } from './components/Sidebar/ResetAllButton';
 import { MockupCanvas } from './components/Mockup/MockupCanvas';
 import { SaveImageButton } from './components/Mockup/SaveImageButton';
-import { getDefaultSize } from './config/devices';
+import { getDefaultSize, getDeviceLabel } from './config/devices';
 import { computeInitialPlacement } from './utils/placement';
 import logo from './assets/logo.png';
 import type {
@@ -203,7 +203,11 @@ export default function App() {
             onUpdatePlaced={handleUpdatePlaced}
             onDeletePlaced={handleDeletePlaced}
           />
-          <SaveImageButton targetRef={frameRef} onBeforeCapture={() => setSelectedId(null)} />
+          <SaveImageButton
+            targetRef={frameRef}
+            deviceLabel={getDeviceLabel(device, maker, size, iphoneModel)}
+            onBeforeCapture={() => setSelectedId(null)}
+          />
         </div>
       </div>
 
