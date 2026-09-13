@@ -21,9 +21,6 @@ export function StickerUploader({ onUpload }: Props) {
         画像を選ぶ
         <input type="file" accept="image/*" multiple hidden onChange={handleChange} />
       </label>
-      <p className="sm-upload-note">
-        アップロードした画像はお使いのブラウザ内でのみ処理され、外部のサーバーに送信・保存されることはありません。画像の権利は投稿者ご自身に帰属します。第三者の著作物を無断でアップロードしないようご注意ください。
-      </p>
     </div>
   );
 }

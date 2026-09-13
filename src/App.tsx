@@ -222,6 +222,9 @@ export default function App() {
 
       <footer className="sm-footer">
         <span className="sm-footer-brand">STICKER MOCKUPER</span> Beta by CREATIVESTUDIOSNOW
+        <p className="sm-footer-note">
+          アップロードした画像はお使いのブラウザ内でのみ処理され、外部のサーバーに送信・保存されることはありません。画像の権利は投稿者ご自身に帰属します。第三者の著作物を無断でアップロードしないようご注意ください。
+        </p>
       </footer>
 
       {dragPreview && (
