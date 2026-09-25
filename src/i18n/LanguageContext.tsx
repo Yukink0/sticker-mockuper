@@ -9,8 +9,21 @@ function isLang(value: string | null): value is Lang {
   return value === 'ja' || value === 'en' || value === 'ko';
 }
 
-// 前回選んだ言語 → ブラウザの言語設定 → 日本語 の順で初期言語を決める
+// 言語ごとにURLを分けている（/ = 日本語, /en/, /ko/）。SNSでシェアされたURLの
+// 言語で開けるよう、URLの言語を最優先にする
+function langFromPath(): Lang | null {
+  const m = window.location.pathname.match(/^\/(en|ko)(\/|$)/);
+  return m ? (m[1] as Lang) : null;
+}
+
+function pathForLang(lang: Lang): string {
+  return lang === 'ja' ? '/' : `/${lang}/`;
+}
+
+// URLの言語 → 前回選んだ言語 → ブラウザの言語設定 → 日本語 の順で初期言語を決める
 function detectInitialLang(): Lang {
+  const fromPath = langFromPath();
+  if (fromPath) return fromPath;
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (isLang(saved)) return saved;
@@ -36,6 +49,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   function setLang(next: Lang) {
     setLangState(next);
+    // コピーしたURLをシェアしたときに、その言語のOGPカードが出るようURLも合わせる
+    if (window.location.pathname !== pathForLang(next)) {
+      window.history.replaceState(null, '', pathForLang(next) + window.location.search);
+    }
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
