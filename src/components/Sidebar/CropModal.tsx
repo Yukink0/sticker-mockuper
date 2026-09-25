@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { clamp } from '../../utils/placement';
+import { useLang } from '../../i18n/LanguageContext';
 
 interface Props {
   src: string;
@@ -41,6 +42,7 @@ function resizeCorner(corner: Corner, start: Box, dx: number, dy: number, bounds
 }
 
 export function CropModal({ src, onCancel, onConfirm }: Props) {
+  const { t } = useLang();
   const imgRef = useRef<HTMLImageElement>(null);
   const [natural, setNatural] = useState<{ w: number; h: number } | null>(null);
   const [stage, setStage] = useState<{ w: number; h: number } | null>(null);
@@ -136,11 +138,11 @@ export function CropModal({ src, onCancel, onConfirm }: Props) {
   return (
     <div className="sm-crop-modal-backdrop" onClick={onCancel}>
       <div className="sm-crop-modal" onClick={(e) => e.stopPropagation()}>
-        <p className="sm-save-modal-hint">四隅をドラッグして範囲を選び、ドラッグして位置を調整できます</p>
+        <p className="sm-save-modal-hint">{t.cropHint}</p>
 
         <div className="sm-crop-stage" style={stage ? { width: stage.w, height: stage.h } : undefined}>
           {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <img ref={imgRef} src={src} onLoad={handleImgLoad} className="sm-crop-img" draggable={false} alt="トリミング対象の画像" />
+          <img ref={imgRef} src={src} onLoad={handleImgLoad} className="sm-crop-img" draggable={false} alt={t.cropTargetAlt} />
 
           {box && stage && (
             <>
@@ -174,10 +176,10 @@ export function CropModal({ src, onCancel, onConfirm }: Props) {
 
         <div className="sm-save-modal-actions">
           <button className="sm-btn sm-save" onClick={handleConfirm} disabled={!box}>
-            トリミングを適用
+            {t.cropApply}
           </button>
           <button className="sm-btn" onClick={onCancel}>
-            キャンセル
+            {t.cancel}
           </button>
         </div>
       </div>

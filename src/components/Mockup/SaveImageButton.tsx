@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import { track } from '@vercel/analytics/react';
 import IconDownload from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
 import qrCode from '../../assets/qrcode.png';
+import { useLang } from '../../i18n/LanguageContext';
 import logo from '../../assets/logo.png';
 
 interface Props {
@@ -149,6 +150,7 @@ async function composeBrandedCard(
 }
 
 export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Props) {
+  const { t } = useLang();
   const [saving, setSaving] = useState(false);
   // Web Shareが使えない/失敗した場合のフォールバック用：生成した画像をその場に表示し、
   // 長押し（OS標準の「写真に追加」）で保存してもらう。<a download>はiOS Safariで
@@ -203,9 +205,9 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
       setPreviewSrc(canvas.toDataURL('image/png'));
     } catch (err) {
       // 失敗時に何も起きないと原因が分からなくなるため、必ずユーザーに知らせる
-      console.error('画像の保存に失敗しました', err);
+      console.error('Failed to save image', err);
       window.alert(
-        `画像の保存に失敗しました。\n${err instanceof Error ? err.message : String(err)}`,
+        `${t.saveFailed}\n${err instanceof Error ? err.message : String(err)}`,
       );
     } finally {
       setSaving(false);
@@ -216,22 +218,22 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
     <>
       <button className="sm-btn sm-save" onClick={handleSave} disabled={saving}>
         <IconDownload size={14} aria-hidden />
-        {saving ? '保存中…' : '画像として保存'}
+        {saving ? t.saving : t.save}
       </button>
 
       {previewSrc && (
         <div className="sm-save-modal-backdrop" onClick={() => setPreviewSrc(null)}>
           <div className="sm-save-modal" onClick={(e) => e.stopPropagation()}>
             <p className="sm-save-modal-hint">
-              画像を長押しして「写真に追加」を選ぶと保存できます
+              {t.saveHint}
             </p>
-            <img src={previewSrc} alt="モックアップ画像" className="sm-save-modal-img" />
+            <img src={previewSrc} alt={t.mockupImageAlt} className="sm-save-modal-img" />
             <div className="sm-save-modal-actions">
               <a href={previewSrc} download="sticker-mockup.png" className="sm-btn sm-save">
-                ダウンロード
+                {t.download}
               </a>
               <button className="sm-btn" onClick={() => setPreviewSrc(null)}>
-                閉じる
+                {t.close}
               </button>
             </div>
           </div>

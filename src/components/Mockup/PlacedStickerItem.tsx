@@ -1,6 +1,7 @@
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import IconX from '@tabler/icons-react/dist/esm/icons/IconX.mjs';
 import type { PlacedSticker } from '../../types';
+import { useLang } from '../../i18n/LanguageContext';
 
 interface Props {
   sticker: PlacedSticker;
@@ -21,6 +22,7 @@ export function PlacedStickerItem({
   onStartResize,
   onStartRotate,
 }: Props) {
+  const { t } = useLang();
   return (
     <div
       className={`sm-placed${selected ? ' selected' : ''}`}
@@ -39,7 +41,7 @@ export function PlacedStickerItem({
       <img src={sticker.src} alt="" draggable={false} onPointerDown={onStartMove} />
       <button
         className="sm-x"
-        aria-label="削除"
+        aria-label={t.delete}
         onClick={(e) => {
           e.stopPropagation();
           onDelete();

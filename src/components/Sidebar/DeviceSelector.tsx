@@ -5,6 +5,7 @@ import IconDeviceTablet from '@tabler/icons-react/dist/esm/icons/IconDeviceTable
 import IconDeviceMobile from '@tabler/icons-react/dist/esm/icons/IconDeviceMobile.mjs';
 import IconLuggage from '@tabler/icons-react/dist/esm/icons/IconLuggage.mjs';
 import type { DeviceType } from '../../types';
+import { useLang } from '../../i18n/LanguageContext';
 
 interface Props {
   device: DeviceType;
@@ -12,9 +13,10 @@ interface Props {
 }
 
 export function DeviceSelector({ device, onSelect }: Props) {
+  const { t } = useLang();
   return (
     <div>
-      <div className="sm-label">デバイス</div>
+      <div className="sm-label">{t.device}</div>
       <div className="sm-btn-row">
         <button
           className={`sm-btn${device === 'pc' ? ' active' : ''}`}
@@ -37,9 +39,9 @@ export function DeviceSelector({ device, onSelect }: Props) {
           <IconDeviceMobile size={14} aria-hidden />
           iPhone
         </button>
-        <button className="sm-btn" disabled title="近日対応">
+        <button className="sm-btn" disabled title={t.comingSoon}>
           <IconLuggage size={14} aria-hidden />
-          スーツケース
+          {t.suitcase}
         </button>
       </div>
     </div>

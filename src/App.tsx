@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { Analytics, track } from '@vercel/analytics/react';
+import { LanguageSwitcher } from './components/LanguageSwitcher';
+import { useLang } from './i18n/LanguageContext';
 import { DeviceSelector } from './components/Sidebar/DeviceSelector';
 import { MakerSelector } from './components/Sidebar/MakerSelector';
 import { SizeSelector } from './components/Sidebar/SizeSelector';
@@ -26,6 +28,7 @@ import type {
 import './App.css';
 
 export default function App() {
+  const { t } = useLang();
   const [device, setDevice] = useState<DeviceType>('pc');
   const [maker, setMaker] = useState<Maker>('macbook');
   const [size, setSize] = useState<MacbookSize | SurfaceSize>('14');
@@ -175,9 +178,10 @@ export default function App() {
   return (
     <div className="sm-page">
       <Analytics />
+      <LanguageSwitcher />
       <header className="sm-header">
         <img src={logo} alt="Sticker Mockuper" className="sm-header-logo" />
-        <p className="sm-header-tagline">ステッカーを貼る前に、シミュレーション</p>
+        <p className="sm-header-tagline">{t.tagline}</p>
       </header>
 
       <div className="sm-app">
@@ -223,7 +227,7 @@ export default function App() {
       <footer className="sm-footer">
         <span className="sm-footer-brand">STICKER MOCKUPER</span> Beta by CREATIVESTUDIOSNOW
         <p className="sm-footer-note">
-          アップロードした画像はお使いのブラウザ内でのみ処理され、外部のサーバーに送信・保存されることはありません。画像の権利は投稿者ご自身に帰属します。第三者の著作物を無断でアップロードしないようご注意ください。
+          {t.uploadNotice}
         </p>
       </footer>
 
