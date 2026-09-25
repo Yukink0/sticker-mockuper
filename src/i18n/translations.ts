@@ -9,7 +9,7 @@ export const LANGS: { code: Lang; label: string }[] = [
 const ja = {
   tagline: 'ステッカーを貼る前に、シミュレーション',
   uploadNotice:
-    'アップロードした画像はお使いのブラウザ内でのみ処理され、外部のサーバーに送信・保存されることはありません。画像の権利は投稿者ご自身に帰属します。第三者の著作物を無断でアップロードしないようご注意ください。',
+    'アップロードした画像はお使いのブラウザ内でのみ処理され、外部のサーバーに送信・保存されることはありません。画像の権利は元の権利者に帰属します。書き出した画像をSNS等で公開する際は、権利者の意向にご配慮ください。',
   device: 'デバイス',
   suitcase: 'スーツケース',
   comingSoon: '近日対応',
@@ -44,7 +44,7 @@ export type Messages = typeof ja;
 const en: Messages = {
   tagline: 'Simulate before you stick',
   uploadNotice:
-    'Uploaded images are processed only in your browser and are never sent to or stored on any external server. You retain the rights to your images. Please do not upload third-party works without permission.',
+    'Uploaded images are processed only in your browser and are never sent to or stored on any external server. Rights to each image remain with its original rights holder. When you share exported images publicly, such as on social media, please respect the rights holders\' wishes.',
   device: 'Device',
   suitcase: 'Suitcase',
   comingSoon: 'Coming soon',
@@ -77,7 +77,7 @@ const en: Messages = {
 const ko: Messages = {
   tagline: '스티커를 붙이기 전에, 시뮬레이션',
   uploadNotice:
-    '업로드한 이미지는 사용 중인 브라우저 안에서만 처리되며, 외부 서버로 전송되거나 저장되지 않습니다. 이미지의 권리는 업로드한 본인에게 있습니다. 제3자의 저작물을 무단으로 업로드하지 않도록 주의해 주세요.',
+    '업로드한 이미지는 사용 중인 브라우저 안에서만 처리되며, 외부 서버로 전송되거나 저장되지 않습니다. 이미지의 권리는 원 권리자에게 있습니다. 내보낸 이미지를 SNS 등에 공개할 때는 권리자의 의사를 존중해 주세요.',
   device: '기기',
   suitcase: '캐리어',
   comingSoon: '곧 지원 예정',
