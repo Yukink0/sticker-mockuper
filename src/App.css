@@ -740,3 +740,28 @@
   color: #fff;
   font-weight: 600;
 }
+
+/* スマートフォン：設定パネルを画面幅いっぱいの横長にし、言語切り替えはロゴと重ならないよう上に独立させる */
+@media (max-width: 640px) {
+  .sm-page {
+    padding: 1rem 1rem 2rem;
+    gap: 20px;
+  }
+
+  .sm-lang {
+    position: static;
+    align-self: flex-end;
+    margin-bottom: 4px;
+  }
+
+  .sm-sidebar {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .sm-main {
+    min-width: 0;
+    width: 100%;
+    padding: 1.25rem 0.75rem;
+  }
+}
