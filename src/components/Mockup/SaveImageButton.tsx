@@ -160,13 +160,25 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
   async function handleSave() {
     if (!targetRef.current || saving) return;
     setSaving(true);
+    let restoreTransition: (() => void) | null = null;
     try {
       // 選択枠・削除ボタン・リサイズハンドルが写り込まないよう、選択解除してから撮影する
       onBeforeCapture();
       await waitForNextPaint();
 
-      // 実物の角丸を、後段の再クリップに使えるよう幅に対する比率で控えておく
+      // デバイス切り替え直後は、モックアップの幅・高さがCSSアニメーションで変化している
+      // 最中のことがある。途中のサイズのまま撮影すると形やステッカー位置が崩れるので、
+      // アニメーションを止めて最終サイズに確定させてから撮影する
       const mockupEl = targetRef.current;
+      const prevTransition = mockupEl.style.transition;
+      restoreTransition = () => {
+        mockupEl.style.transition = prevTransition;
+      };
+      mockupEl.style.transition = 'none';
+      void mockupEl.offsetWidth;
+      await waitForNextPaint();
+
+      // 実物の角丸を、後段の再クリップに使えるよう幅に対する比率で控えておく
       const mockupWidthCss = mockupEl.getBoundingClientRect().width;
       const borderRadiusCss = parseFloat(getComputedStyle(mockupEl).borderRadius) || 0;
       const mockupRadiusRatio = mockupWidthCss > 0 ? borderRadiusCss / mockupWidthCss : 0;
@@ -210,6 +222,7 @@ export function SaveImageButton({ targetRef, deviceLabel, onBeforeCapture }: Pro
         `${t.saveFailed}\n${err instanceof Error ? err.message : String(err)}`,
       );
     } finally {
+      restoreTransition?.();
       setSaving(false);
     }
   }
