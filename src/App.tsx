@@ -225,7 +225,7 @@ export default function App() {
       </div>
 
       <footer className="sm-footer">
-        <span className="sm-footer-brand">STICKER MOCKUPER</span> Beta by CREATIVESTUDIOSNOW
+        <span className="sm-footer-brand">STICKER MOCKUPER</span> Beta
         <p className="sm-footer-note">
           {t.uploadNotice}
         </p>
